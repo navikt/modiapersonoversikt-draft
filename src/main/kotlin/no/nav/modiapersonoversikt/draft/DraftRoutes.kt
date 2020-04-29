@@ -5,10 +5,13 @@ import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.auth.principal
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.Parameters
 import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.routing.*
+import io.ktor.util.filter
 import io.ktor.util.pipeline.PipelineContext
+import io.ktor.util.toMap
 import no.nav.modiapersonoversikt.infrastructure.SubjectPrincipal
 
 fun Route.draftRoutes(dao: DraftDAO) {
@@ -16,30 +19,9 @@ fun Route.draftRoutes(dao: DraftDAO) {
         route("/draft") {
             get {
                 withSubject {subject ->
-                    val dto = DraftIdentificatorDTO(subject, emptyMap())
-                    val result = dao.get(dto.fromDTO(), false)
-                    call.respond(result.toDTO())
-                }
-            }
-
-            post("/get") {
-                withSubject { subject ->
-                    val exact = call.request.queryParameters["exact"]?.toBoolean() ?: true
-
-                    val dto = DraftIdentificatorDTO(subject, call.receive())
+                    val (exact, context) = call.request.queryParameters.parse()
+                    val dto = DraftIdentificatorDTO(subject, context)
                     val result = dao.get(dto.fromDTO(), exact)
-
-                    call.respond(result.firstOrNull()?.toDTO() ?: HttpStatusCode.NoContent)
-                }
-            }
-
-            post("/search") {
-                withSubject { subject ->
-                    val exact = call.request.queryParameters["exact"]?.toBoolean() ?: true
-
-                    val dto = DraftIdentificatorDTO(subject, call.receive())
-                    val result = dao.get(dto.fromDTO(), exact)
-
                     call.respond(result.toDTO())
                 }
             }
@@ -61,6 +43,16 @@ fun Route.draftRoutes(dao: DraftDAO) {
             }
         }
     }
+}
+
+private fun Parameters.parse(): Pair<Boolean, DraftContext> {
+    val exact = this["exact"]?.toBoolean() ?: true
+    val context = this
+            .filter { key, value -> "exact" != key }
+            .toMap()
+            .mapValues { entry -> entry.value.first() }
+
+    return Pair(exact, context)
 }
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.withSubject(body: suspend (subject: String) -> Unit) {
