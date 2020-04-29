@@ -46,5 +46,6 @@ fun SaveDraft.toDraftIdentificator() = DraftIdentificator(owner, context)
 interface DraftDAO {
     suspend fun save(data: SaveDraft): Draft
     suspend fun get(data: DraftIdentificator): Draft?
+    suspend fun getAll(data: DraftIdentificator): List<Draft>
     suspend fun delete(data: DraftIdentificator)
 }

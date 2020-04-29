@@ -1,6 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-val mainClass = "no.nav.modiapersonoversikt.ApplicationKt"
+val mainClass = "no.nav.modiapersonoversikt.MainKt"
 val kotlinVersion = "1.3.70"
 val ktorVersion = "1.3.1"
 val prometheusVersion = "0.4.0"
@@ -41,7 +41,9 @@ dependencies {
     implementation("com.natpryce:konfig:$konfigVersion")
 
     testRuntimeOnly("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
+    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("org.testcontainers:postgresql:1.14.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.6.2")
 }
 
 repositories {
@@ -53,6 +55,13 @@ repositories {
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
+}
+
+tasks.test {
+    useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
 }
 
 tasks.withType<Wrapper> {

@@ -1,31 +1,74 @@
 package no.nav.modiapersonoversikt
 
+import io.ktor.application.Application
+import io.ktor.application.install
+import io.ktor.auth.Authentication
+import io.ktor.features.CORS
+import io.ktor.features.CallLogging
+import io.ktor.features.ContentNegotiation
+import io.ktor.features.StatusPages
+import io.ktor.http.ContentType
+import io.ktor.http.HttpMethod
+import io.ktor.jackson.JacksonConverter
+import io.ktor.metrics.dropwizard.DropwizardMetrics
+import io.ktor.request.path
+import io.ktor.routing.route
+import io.ktor.routing.routing
+import io.prometheus.client.dropwizard.DropwizardExports
 import no.nav.modiapersonoversikt.config.Configuration
-import no.nav.modiapersonoversikt.config.DataSourceConfiguration
-import org.slf4j.LoggerFactory
+import no.nav.modiapersonoversikt.draft.DraftDAOImpl
+import no.nav.modiapersonoversikt.draft.draftRoutes
+import no.nav.modiapersonoversikt.infrastructure.*
+import no.nav.modiapersonoversikt.utils.JacksonUtils.objectMapper
+import org.slf4j.event.Level
+import javax.sql.DataSource
 
-val log = LoggerFactory.getLogger("modiapersonoversikt-draft.Application")
-data class ApplicationState(var running: Boolean = true, var initialized: Boolean = false)
+fun Application.draftApp(
+        configuration: Configuration,
+        dataSource: DataSource,
+        useMock: Boolean = false
+) {
 
-fun main() {
-    val configuration = Configuration()
-    val dbConfig = DataSourceConfiguration(configuration)
-    val applicationState = ApplicationState()
+    install(StatusPages) {
+        notFoundHandler()
+        exceptionHandler()
+    }
 
-    DataSourceConfiguration.migrateDb(configuration, dbConfig.adminDataSource())
+    install(CORS) {
+        anyHost()
+        method(HttpMethod.Post)
+        method(HttpMethod.Delete)
+    }
 
-    val applicationServer = createHttpServer(
-            applicationState = applicationState,
-            configuration = configuration,
-            dataSource = dbConfig.userDataSource(),
-            useMock = false
-    )
+    install(Authentication) {
+        if (useMock) {
+            setupMock(SubjectPrincipal("Z999999"))
+        } else {
+            setupJWT(configuration.jwksUrl)
+        }
+    }
 
-    Runtime.getRuntime().addShutdownHook(Thread {
-        log.info("Shutdown hook called, shutting down gracefully")
-        applicationState.initialized = false
-        applicationServer.stop(5000, 5000)
-    })
+    install(ContentNegotiation) {
+        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+    }
 
-    applicationServer.start(wait = true)
+    install(CallLogging) {
+        level = Level.INFO
+        filter { call -> call.request.path().startsWith("/modiapersonoversikt-draft/api") }
+        mdc("userId", Security::getSubject)
+    }
+
+    install(DropwizardMetrics) {
+        io.prometheus.client.CollectorRegistry.defaultRegistry.register(DropwizardExports(registry))
+    }
+
+    val draftDAO = DraftDAOImpl(dataSource)
+
+    routing {
+        route("modiapersonoversikt-draft") {
+            route("api") {
+                draftRoutes(draftDAO)
+            }
+        }
+    }
 }

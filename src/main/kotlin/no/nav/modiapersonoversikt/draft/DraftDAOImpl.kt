@@ -24,6 +24,10 @@ class DraftDAOImpl(private val dataSource: DataSource) : DraftDAO {
         return transactional(dataSource) { tx -> get(tx, data) }
     }
 
+    override suspend fun getAll(data: DraftIdentificator): List<Draft> {
+        return transactional(dataSource) { tx -> getAll(tx, data) }
+    }
+
     override suspend fun delete(data: DraftIdentificator) {
         return transactional(dataSource) { tx -> delete(tx, data) }
     }
@@ -31,13 +35,19 @@ class DraftDAOImpl(private val dataSource: DataSource) : DraftDAO {
 }
 
 private fun get(tx: TransactionalSession, data: DraftIdentificator): Draft? {
-    return getQuery(data)
+    return getQuery(data, JSONBOperator.MATCHES)
             .asSingle
             .execute(tx)
 }
 
-private fun getQuery(data: DraftIdentificator): ResultQueryActionBuilder<Draft> {
-    return queryOf("SELECT * FROM $table WHERE owner = ? AND context = ?::jsonb", data.owner, data.context.toJson())
+private fun getAll(tx: TransactionalSession, data: DraftIdentificator): List<Draft> {
+    return getQuery(data, JSONBOperator.EQUALS)
+            .asList
+            .execute(tx)
+}
+
+private fun getQuery(data: DraftIdentificator, operator: JSONBOperator): ResultQueryActionBuilder<Draft> {
+    return queryOf("SELECT * FROM $table WHERE owner = ? AND context ${operator.sql} ?::jsonb", data.owner, data.context.toJson())
             .map { row ->
                 Draft(
                         row.string("owner"),
@@ -58,4 +68,8 @@ private fun delete(tx: TransactionalSession, data: DraftIdentificator): Int {
     return queryOf("DELETE FROM $table WHERE owner = ? AND context = ?::jsonb", data.owner, data.context.toJson())
             .asUpdate
             .execute(tx)
+}
+
+private enum class JSONBOperator(val sql: String) {
+    EQUALS("="), MATCHES("@>")
 }
