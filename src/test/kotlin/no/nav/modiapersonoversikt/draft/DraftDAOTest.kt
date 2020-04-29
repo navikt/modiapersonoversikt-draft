@@ -1,7 +1,8 @@
-package no.nav.modiapersonoversikt
+package no.nav.modiapersonoversikt.draft
 
 import kotlinx.coroutines.runBlocking
-import no.nav.modiapersonoversikt.draft.*
+import no.nav.modiapersonoversikt.WithDatabase
+import no.nav.modiapersonoversikt.assertDraftMatches
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime

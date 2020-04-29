@@ -1,7 +1,9 @@
-package no.nav.modiapersonoversikt
+package no.nav.modiapersonoversikt.infrastructure
 
 import io.ktor.http.HttpMethod
 import io.ktor.server.testing.handleRequest
+import no.nav.modiapersonoversikt.WithDatabase
+import no.nav.modiapersonoversikt.withTestApp
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
