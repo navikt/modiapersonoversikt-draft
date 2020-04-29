@@ -3,11 +3,14 @@ package no.nav.modiapersonoversikt
 import io.ktor.application.Application
 import io.ktor.server.testing.TestApplicationEngine
 import io.ktor.server.testing.withTestApplication
+import kotlinx.coroutines.runBlocking
+import kotliquery.queryOf
 import no.nav.modiapersonoversikt.config.Configuration
 import no.nav.modiapersonoversikt.config.DataSourceConfiguration
 import no.nav.modiapersonoversikt.draft.Draft
 import no.nav.modiapersonoversikt.infrastructure.ApplicationState
 import no.nav.modiapersonoversikt.infrastructure.naisApplication
+import no.nav.modiapersonoversikt.utils.transactional
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
@@ -33,7 +36,11 @@ interface WithDatabase {
 
     @BeforeEach
     fun clearDatabase() {
-        dbConfig.adminDataSource().connection.prepareStatement("DELETE FROM draft").execute()
+        runBlocking {
+            transactional(dbConfig.adminDataSource()) {tx ->
+                tx.run(queryOf("DELETE FROM draft").asExecute)
+            }
+        }
     }
 
     fun dataSource(): DataSource = dbConfig.userDataSource()
@@ -48,7 +55,7 @@ fun <R> withTestApp(test: TestApplicationEngine.() -> R): R {
     return withTestApplication(moduleFunction, test)
 }
 
-fun assertDraftMatches(expected: Draft, actuals: List<Draft>, delta: Int = 100) {
+fun assertDraftMatches(expected: Draft, actuals: List<Draft>, delta: Int = 1000) {
     val assertions = actuals
             .flatMap { actual ->
                 listOf(
@@ -57,7 +64,7 @@ fun assertDraftMatches(expected: Draft, actuals: List<Draft>, delta: Int = 100) 
                         { Assertions.assertEquals(expected.context, actual.context, "Owner did not match") },
                         {
                             val timeDifference = abs(expected.created.toEpochMilli() - actual.created.toEpochMilli())
-                            Assertions.assertTrue(timeDifference < delta, "Timedifference was greater than $delta, was: $timeDifference")
+                            assertTrue(timeDifference < delta, "Timedifference was greater than $delta, was: $timeDifference")
                         }
                 )
             }
