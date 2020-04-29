@@ -57,7 +57,7 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
-tasks.test {
+tasks.withType<Test> {
     useJUnitPlatform()
     testLogging {
         events("passed", "skipped", "failed")
