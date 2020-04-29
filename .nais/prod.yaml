@@ -10,18 +10,18 @@ spec:
   port: 7070
   team: personoversikt
   liveness:
-    path: /modiapersonoversikt-draft/isAlive
+    path: /modiapersonoversikt-draft/internal/isAlive
     initialDelay: 20
     timeout: 1
     periodSeconds: 5
     failureThreshold: 10
   readiness:
-    path: /modiapersonoversikt-draft/isReady
+    path: /modiapersonoversikt-draft/internal/isReady
     initialDelay: 20
     timeout: 1
   prometheus:
     enabled: true
-    path: /modiapersonoversikt-draft/metrics
+    path: /modiapersonoversikt-draft/internal/metrics
   resources:
     requests:
       cpu: 50m
