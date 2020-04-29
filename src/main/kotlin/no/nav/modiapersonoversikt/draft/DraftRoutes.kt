@@ -19,9 +19,23 @@ fun Route.draftRoutes(dao: DraftDAO) {
         route("/draft") {
             post("/get") {
                 withSubject { subject ->
+                    val exact = call.request.queryParameters["exact"]?.toBoolean() ?: true
+
                     val dto = DraftIdentificatorDTO(subject, call.receive())
-                    val result = dao.get(dto.fromDTO())
-                    call.respond(result?.toDTO() ?: HttpStatusCode.NoContent)
+                    val result = dao.get(dto.fromDTO(), exact)
+
+                    call.respond(result.firstOrNull()?.toDTO() ?: HttpStatusCode.NoContent)
+                }
+            }
+
+            post("/search") {
+                withSubject { subject ->
+                    val exact = call.request.queryParameters["exact"]?.toBoolean() ?: true
+
+                    val dto = DraftIdentificatorDTO(subject, call.receive())
+                    val result = dao.get(dto.fromDTO(), exact)
+
+                    call.respond(result.toDTO())
                 }
             }
 

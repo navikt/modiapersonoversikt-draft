@@ -3,8 +3,8 @@ package no.nav.modiapersonoversikt.draft
 import kotlinx.coroutines.runBlocking
 import no.nav.modiapersonoversikt.WithDatabase
 import no.nav.modiapersonoversikt.assertDraftMatches
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.assertTrue
 import java.time.LocalDateTime
 
 class DraftDAOTest : WithDatabase {
@@ -27,11 +27,11 @@ class DraftDAOTest : WithDatabase {
         dao.delete(DraftIdentificator(owner, context))
         val deletedResult = dao.get(DraftIdentificator(owner, context))
 
-        assertNull(startResult)
-        assertDraftMatches(Draft(owner, content, context, LocalDateTime.now()), saveResult)
+        assertTrue(startResult.isEmpty())
+        assertDraftMatches(Draft(owner, content, context, LocalDateTime.now()), listOf(saveResult))
         assertDraftMatches(Draft(owner, content, context, LocalDateTime.now()), retrievedResult)
-        assertDraftMatches(Draft(owner, updatedContent, context, LocalDateTime.now()), saveResult2)
+        assertDraftMatches(Draft(owner, updatedContent, context, LocalDateTime.now()), listOf(saveResult2))
         assertDraftMatches(Draft(owner, updatedContent, context, LocalDateTime.now()), retrievedResult2)
-        assertNull(deletedResult)
+        assertTrue(deletedResult.isEmpty())
     }
 }

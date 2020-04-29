@@ -16,16 +16,12 @@ class DraftDAOImpl(private val dataSource: DataSource) : DraftDAO {
         return transactional(dataSource) { tx ->
             delete(tx, data.toDraftIdentificator())
             save(tx, data)
-            get(tx, data.toDraftIdentificator())!!
+            get(tx, data.toDraftIdentificator(), true).first()
         }
     }
 
-    override suspend fun get(data: DraftIdentificator): Draft? {
-        return transactional(dataSource) { tx -> get(tx, data) }
-    }
-
-    override suspend fun getAll(data: DraftIdentificator): List<Draft> {
-        return transactional(dataSource) { tx -> getAll(tx, data) }
+    override suspend fun get(data: DraftIdentificator, exact: Boolean): List<Draft> {
+        return transactional(dataSource) { tx -> get(tx, data, exact) }
     }
 
     override suspend fun delete(data: DraftIdentificator) {
@@ -34,14 +30,8 @@ class DraftDAOImpl(private val dataSource: DataSource) : DraftDAO {
 
 }
 
-private fun get(tx: TransactionalSession, data: DraftIdentificator): Draft? {
-    return getQuery(data, JSONBOperator.MATCHES)
-            .asSingle
-            .execute(tx)
-}
-
-private fun getAll(tx: TransactionalSession, data: DraftIdentificator): List<Draft> {
-    return getQuery(data, JSONBOperator.EQUALS)
+private fun get(tx: TransactionalSession, data: DraftIdentificator, exact: Boolean): List<Draft> {
+    return getQuery(data, JSONBOperator.fromBoolean(exact))
             .asList
             .execute(tx)
 }
@@ -71,5 +61,9 @@ private fun delete(tx: TransactionalSession, data: DraftIdentificator): Int {
 }
 
 private enum class JSONBOperator(val sql: String) {
-    EQUALS("="), MATCHES("@>")
+    EQUALS("="), MATCHES("@>");
+
+    companion object {
+        fun fromBoolean(exact: Boolean): JSONBOperator = if (exact) EQUALS else MATCHES
+    }
 }

@@ -41,11 +41,11 @@ data class Draft(
 fun DraftIdentificatorDTO.fromDTO() = DraftIdentificator(owner, context)
 fun SaveDraftDTO.fromDTO(owner: String) = SaveDraft(owner, content, context)
 fun Draft.toDTO() = DraftDTO(owner, content, context, created)
+fun List<Draft>.toDTO() = this.map(Draft::toDTO)
 fun SaveDraft.toDraftIdentificator() = DraftIdentificator(owner, context)
 
 interface DraftDAO {
     suspend fun save(data: SaveDraft): Draft
-    suspend fun get(data: DraftIdentificator): Draft?
-    suspend fun getAll(data: DraftIdentificator): List<Draft>
+    suspend fun get(data: DraftIdentificator, exact: Boolean = true): List<Draft>
     suspend fun delete(data: DraftIdentificator)
 }
