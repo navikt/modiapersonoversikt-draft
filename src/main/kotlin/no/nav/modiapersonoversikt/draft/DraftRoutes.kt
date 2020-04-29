@@ -7,16 +7,21 @@ import io.ktor.auth.principal
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
 import io.ktor.response.respond
-import io.ktor.routing.Route
-import io.ktor.routing.delete
-import io.ktor.routing.post
-import io.ktor.routing.route
+import io.ktor.routing.*
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.modiapersonoversikt.infrastructure.SubjectPrincipal
 
 fun Route.draftRoutes(dao: DraftDAO) {
     authenticate {
         route("/draft") {
+            get {
+                withSubject {subject ->
+                    val dto = DraftIdentificatorDTO(subject, emptyMap())
+                    val result = dao.get(dto.fromDTO(), false)
+                    call.respond(result.toDTO())
+                }
+            }
+
             post("/get") {
                 withSubject { subject ->
                     val exact = call.request.queryParameters["exact"]?.toBoolean() ?: true
