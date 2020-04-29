@@ -10,6 +10,9 @@ En tjeneste for å ta vare på kladd for modiapersonoversikt.
 Spørsmål knyttet til koden eller prosjektet kan rettes mot:
 
 -   Jan-Eirik B. Nævdal, jan.eirik.b.navdal@nav.no
+-   Andreas Bergman, andreas.bergman@nav.no
+-   Nicklas Utgaard, nicklas.utgaard@nav.no
+-   Ankur Tade, ankur.tade@nav.no
 
 ### For NAV-ansatte
 Interne henvendelser kan sendes via Slack i kanalen #team-personoversikt.
