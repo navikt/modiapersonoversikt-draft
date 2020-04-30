@@ -21,14 +21,12 @@ import no.nav.modiapersonoversikt.draft.DraftDAOImpl
 import no.nav.modiapersonoversikt.draft.draftRoutes
 import no.nav.modiapersonoversikt.infrastructure.*
 import no.nav.modiapersonoversikt.utils.JacksonUtils.objectMapper
+import no.nav.modiapersonoversikt.utils.minutes
 import no.nav.modiapersonoversikt.utils.schedule
 import org.slf4j.event.Level
 import java.util.*
 import javax.sql.DataSource
-import kotlin.time.ExperimentalTime
-import kotlin.time.minutes
 
-@ExperimentalTime
 fun Application.draftApp(
         configuration: Configuration,
         dataSource: DataSource,
