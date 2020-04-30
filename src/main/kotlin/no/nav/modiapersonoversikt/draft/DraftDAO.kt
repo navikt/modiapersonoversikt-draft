@@ -48,4 +48,5 @@ interface DraftDAO {
     suspend fun save(data: SaveDraft): Draft
     suspend fun get(data: DraftIdentificator, exact: Boolean = true): List<Draft>
     suspend fun delete(data: DraftIdentificator)
+    suspend fun deleteOldDrafts()
 }

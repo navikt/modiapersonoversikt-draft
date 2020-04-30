@@ -15,12 +15,16 @@ import io.ktor.request.path
 import io.ktor.routing.route
 import io.ktor.routing.routing
 import io.prometheus.client.dropwizard.DropwizardExports
+import kotlinx.coroutines.runBlocking
 import no.nav.modiapersonoversikt.config.Configuration
 import no.nav.modiapersonoversikt.draft.DraftDAOImpl
 import no.nav.modiapersonoversikt.draft.draftRoutes
 import no.nav.modiapersonoversikt.infrastructure.*
 import no.nav.modiapersonoversikt.utils.JacksonUtils.objectMapper
+import no.nav.modiapersonoversikt.utils.minutes
+import no.nav.modiapersonoversikt.utils.schedule
 import org.slf4j.event.Level
+import java.util.*
 import javax.sql.DataSource
 
 fun Application.draftApp(
@@ -63,6 +67,12 @@ fun Application.draftApp(
     }
 
     val draftDAO = DraftDAOImpl(dataSource)
+
+    Timer().schedule(delay = 5.minutes, period = 10.minutes) {
+        runBlocking {
+            draftDAO.deleteOldDrafts()
+        }
+    }
 
     routing {
         route("modiapersonoversikt-draft") {
