@@ -22,10 +22,10 @@ object JacksonUtils {
 
 }
 
-fun <T> T.toJson(): String {
+inline fun <reified T> T.toJson(): String {
     return JacksonUtils.objectMapper.writeValueAsString(this)
 }
 
-fun <T> String.fromJson(): T {
+inline fun <reified T> String.fromJson(): T {
     return JacksonUtils.objectMapper.readValue(this, object : TypeReference<T>(){})
 }

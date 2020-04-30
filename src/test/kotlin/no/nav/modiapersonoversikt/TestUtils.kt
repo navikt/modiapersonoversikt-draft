@@ -8,6 +8,8 @@ import kotliquery.queryOf
 import no.nav.modiapersonoversikt.config.Configuration
 import no.nav.modiapersonoversikt.config.DataSourceConfiguration
 import no.nav.modiapersonoversikt.draft.Draft
+import no.nav.modiapersonoversikt.draft.DraftDTO
+import no.nav.modiapersonoversikt.draft.toDTO
 import no.nav.modiapersonoversikt.infrastructure.ApplicationState
 import no.nav.modiapersonoversikt.infrastructure.naisApplication
 import no.nav.modiapersonoversikt.utils.transactional
@@ -47,17 +49,38 @@ interface WithDatabase {
     fun connectionUrl(): String = postgreSQLContainer.jdbcUrl
 }
 
-fun <R> withTestApp(test: TestApplicationEngine.() -> R): R {
+fun <R> withTestApp(jdbcUrl: String? = null, test: TestApplicationEngine.() -> R): R {
+    val dataAwareApp = fun Application.() {
+        if (jdbcUrl != null) {
+            val config = Configuration(jdbcUrl = jdbcUrl)
+            val dbConfig = DataSourceConfiguration(config)
+            draftApp(config, dbConfig.userDataSource(), true)
+        }
+    }
+
     val moduleFunction: Application.() -> Unit = {
         naisApplication("modiapersonoversikt-draft", ApplicationState()) {}
+        dataAwareApp()
     }
 
     return withTestApplication(moduleFunction, test)
 }
 
 fun assertDraftMatches(expected: Draft, actuals: List<Draft>, delta: Int = 1000) {
-    val assertions = actuals
-            .flatMap { actual ->
+    assertDraftDTOMatches(expected.toDTO(), actuals.map { it.toDTO() }, delta)
+}
+
+fun assertDraftDTOMatches(expected: DraftDTO, actuals: List<DraftDTO>, delta: Int = 1000) {
+    assertDraftDTOMatches(listOf(expected), actuals, delta)
+}
+
+fun assertDraftDTOMatches(expecteds: List<DraftDTO>, actuals: List<DraftDTO>, delta: Int = 1000) {
+    assertTrue(actuals.isNotEmpty(), "Expected at least one Draft")
+    assertTrue(expecteds.size == actuals.size, "Lengt of lists should be equal")
+
+    val assertions = expecteds
+            .zip(actuals)
+            .flatMap { (expected, actual) ->
                 listOf(
                         { Assertions.assertEquals(expected.owner, actual.owner, "Owner did not match") },
                         { Assertions.assertEquals(expected.content, actual.content, "Owner did not match") },
@@ -69,7 +92,6 @@ fun assertDraftMatches(expected: Draft, actuals: List<Draft>, delta: Int = 1000)
                 )
             }
 
-    assertTrue(actuals.isNotEmpty(), "Expected at least one Draft")
     assertAll("Drafts matches within a timedelta of $delta", assertions)
 }
 
