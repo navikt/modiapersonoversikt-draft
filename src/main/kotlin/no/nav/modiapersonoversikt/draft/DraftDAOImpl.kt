@@ -28,6 +28,11 @@ class DraftDAOImpl(private val dataSource: DataSource) : DraftDAO {
         return transactional(dataSource) { tx -> delete(tx, data) }
     }
 
+    override suspend fun deleteOldDrafts() {
+        return transactional(dataSource) { tx ->
+            tx.run(queryOf("DELETE FROM $table WHERE created < now() - INTERVAL '1 HOUR'").asUpdate)
+        }
+    }
 }
 
 private fun get(tx: TransactionalSession, data: DraftIdentificator, exact: Boolean): List<Draft> {
