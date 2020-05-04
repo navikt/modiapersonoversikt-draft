@@ -1,0 +1,49 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: modiapersonoversikt-draft
+  namespace: default
+  labels:
+    team: personoversikt
+spec:
+  image: {{image}}
+  port: 7070
+  team: personoversikt
+  liveness:
+    path: /modiapersonoversikt-draft/internal/isAlive
+    initialDelay: 20
+    timeout: 1
+    periodSeconds: 5
+    failureThreshold: 10
+  readiness:
+    path: /modiapersonoversikt-draft/internal/isReady
+    initialDelay: 20
+    timeout: 1
+  prometheus:
+    enabled: true
+    path: /modiapersonoversikt-draft/internal/metrics
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 2000m
+      memory: 512Mi
+  ingresses:
+    - https://modiapersonoversikt-draft.nais.adeo.no
+    - https://app.adeo.no/modiapersonoversikt-draft
+  replicas:
+    min: 2
+    max: 4
+    cpuThresholdPercentage: 65
+  vault:
+    enabled: true
+  env:
+    - name: ISSO_JWKS_URL
+      value: "https://isso.adeo.no/isso/oauth2/connect/jwk_uri"
+    - name: ISSO_ISSUER
+      value: "https://isso.adeo.no:443/isso/oauth2"
+    - name: DATABASE_JDBC_URL
+      value: "jdbc:postgresql://A01DBVL009.adeo.no:5432/modiapersonoversikt-draft"
+    - name: VAULT_MOUNTPATH
+      value: "postgresql/prod-fss"
