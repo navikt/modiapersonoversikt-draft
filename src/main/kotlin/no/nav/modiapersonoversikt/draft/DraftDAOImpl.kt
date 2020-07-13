@@ -3,6 +3,7 @@ package no.nav.modiapersonoversikt.draft
 import kotliquery.TransactionalSession
 import kotliquery.action.ResultQueryActionBuilder
 import kotliquery.queryOf
+import no.nav.modiapersonoversikt.log
 import no.nav.modiapersonoversikt.utils.execute
 import no.nav.modiapersonoversikt.utils.fromJson
 import no.nav.modiapersonoversikt.utils.toJson
@@ -30,7 +31,9 @@ class DraftDAOImpl(private val dataSource: DataSource) : DraftDAO {
 
     override suspend fun deleteOldDrafts() {
         return transactional(dataSource) { tx ->
-            tx.run(queryOf("DELETE FROM $table WHERE created < now() - INTERVAL '1 HOUR'").asUpdate)
+            log.info("Deleting old drafts")
+            val deletedLines = tx.run(queryOf("DELETE FROM $table WHERE created < now() - INTERVAL '4 HOUR'").asUpdate)
+            log.info("Deleted old drafts: $deletedLines")
         }
     }
 }
