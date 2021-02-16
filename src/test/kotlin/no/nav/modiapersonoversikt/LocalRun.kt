@@ -5,7 +5,7 @@ import no.nav.modiapersonoversikt.config.DataSourceConfiguration
 import no.nav.modiapersonoversikt.infrastructure.HttpServer
 import org.testcontainers.containers.PostgreSQLContainer
 
-class SpecifiedPostgreSQLContainer : PostgreSQLContainer<SpecifiedPostgreSQLContainer>()
+class SpecifiedPostgreSQLContainer : PostgreSQLContainer<SpecifiedPostgreSQLContainer>("postgres:9.6.12")
 
 fun runLocally(useMock: Boolean) {
     val db = SpecifiedPostgreSQLContainer()
