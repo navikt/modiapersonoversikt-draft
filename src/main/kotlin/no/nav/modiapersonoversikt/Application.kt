@@ -28,9 +28,9 @@ import java.util.*
 import javax.sql.DataSource
 
 fun Application.draftApp(
-        configuration: Configuration,
-        dataSource: DataSource,
-        useMock: Boolean = false
+    configuration: Configuration,
+    dataSource: DataSource,
+    useMock: Boolean = false
 ) {
 
     install(StatusPages) {

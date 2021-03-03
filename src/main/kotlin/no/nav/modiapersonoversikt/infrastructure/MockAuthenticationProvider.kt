@@ -16,8 +16,8 @@ class MockAuthenticationProvider internal constructor(config: Configuration) : A
 }
 
 fun Authentication.Configuration.mock(
-        name: String? = null,
-        configure: MockAuthenticationProvider.Configuration.() -> Unit
+    name: String? = null,
+    configure: MockAuthenticationProvider.Configuration.() -> Unit
 ) {
     val provider = MockAuthenticationProvider.Configuration(name).apply(configure).build()
     val principal = provider.principal
@@ -30,4 +30,3 @@ fun Authentication.Configuration.mock(
 
     register(provider)
 }
-

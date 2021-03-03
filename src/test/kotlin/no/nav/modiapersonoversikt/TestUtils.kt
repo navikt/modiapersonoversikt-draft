@@ -39,7 +39,7 @@ interface WithDatabase {
     @BeforeEach
     fun clearDatabase() {
         runBlocking {
-            transactional(dbConfig.adminDataSource()) {tx ->
+            transactional(dbConfig.adminDataSource()) { tx ->
                 tx.run(queryOf("DELETE FROM draft").asExecute)
             }
         }
@@ -79,18 +79,18 @@ fun assertDraftDTOMatches(expecteds: List<DraftDTO>, actuals: List<DraftDTO>, de
     assertTrue(expecteds.size == actuals.size, "Lengt of lists should be equal")
 
     val assertions = expecteds
-            .zip(actuals)
-            .flatMap { (expected, actual) ->
-                listOf(
-                        { Assertions.assertEquals(expected.owner, actual.owner, "Owner did not match") },
-                        { Assertions.assertEquals(expected.content, actual.content, "Owner did not match") },
-                        { Assertions.assertEquals(expected.context, actual.context, "Owner did not match") },
-                        {
-                            val timeDifference = abs(expected.created.toEpochMilli() - actual.created.toEpochMilli())
-                            assertTrue(timeDifference < delta, "Timedifference was greater than $delta, was: $timeDifference")
-                        }
-                )
-            }
+        .zip(actuals)
+        .flatMap { (expected, actual) ->
+            listOf(
+                { Assertions.assertEquals(expected.owner, actual.owner, "Owner did not match") },
+                { Assertions.assertEquals(expected.content, actual.content, "Owner did not match") },
+                { Assertions.assertEquals(expected.context, actual.context, "Owner did not match") },
+                {
+                    val timeDifference = abs(expected.created.toEpochMilli() - actual.created.toEpochMilli())
+                    assertTrue(timeDifference < delta, "Timedifference was greater than $delta, was: $timeDifference")
+                }
+            )
+        }
 
     assertAll("Drafts matches within a timedelta of $delta", assertions)
 }
