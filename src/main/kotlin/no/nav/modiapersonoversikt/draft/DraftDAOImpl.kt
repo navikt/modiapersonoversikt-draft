@@ -40,32 +40,32 @@ class DraftDAOImpl(private val dataSource: DataSource) : DraftDAO {
 
 private fun get(tx: TransactionalSession, data: DraftIdentificator, exact: Boolean): List<Draft> {
     return getQuery(data, JSONBOperator.fromBoolean(exact))
-            .asList
-            .execute(tx)
+        .asList
+        .execute(tx)
 }
 
 private fun getQuery(data: DraftIdentificator, operator: JSONBOperator): ResultQueryActionBuilder<Draft> {
     return queryOf("SELECT * FROM $table WHERE owner = ? AND context ${operator.sql} ?::jsonb", data.owner, data.context.toJson())
-            .map { row ->
-                Draft(
-                        row.string("owner"),
-                        row.string("content"),
-                        row.string("context").fromJson(),
-                        row.localDateTime("created")
-                )
-            }
+        .map { row ->
+            Draft(
+                row.string("owner"),
+                row.string("content"),
+                row.string("context").fromJson(),
+                row.localDateTime("created")
+            )
+        }
 }
 
 private fun save(tx: TransactionalSession, data: SaveDraft): Int {
     return queryOf("INSERT INTO $table (owner, content, context) VALUES (?, ?, ?::jsonb)", data.owner, data.content, data.context.toJson())
-            .asUpdate
-            .execute(tx)
+        .asUpdate
+        .execute(tx)
 }
 
 private fun delete(tx: TransactionalSession, data: DraftIdentificator): Int {
     return queryOf("DELETE FROM $table WHERE owner = ? AND context = ?::jsonb", data.owner, data.context.toJson())
-            .asUpdate
-            .execute(tx)
+        .asUpdate
+        .execute(tx)
 }
 
 private enum class JSONBOperator(val sql: String) {

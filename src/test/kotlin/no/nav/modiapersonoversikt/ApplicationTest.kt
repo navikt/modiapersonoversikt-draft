@@ -70,8 +70,8 @@ class ApplicationTest : WithDatabase {
 }
 
 class JsonResponse<T>(
-        call: TestApplicationCall,
-        val data: T
+    call: TestApplicationCall,
+    val data: T
 ) {
     val status = call.response.status()?.value ?: -1
 }
@@ -93,9 +93,9 @@ fun TestApplicationEngine.getDrafts(exact: Boolean? = null, context: DraftContex
     }
 
     val queryParams = params
-            .map { entry -> "${entry.key}=${entry.value}" }
-            .joinToString("&")
-            .let { if (it.isNotEmpty()) "?${it}" else "" }
+        .map { entry -> "${entry.key}=${entry.value}" }
+        .joinToString("&")
+        .let { if (it.isNotEmpty()) "?$it" else "" }
 
     val call = handleRequest(HttpMethod.Get, "/modiapersonoversikt-draft/api/draft$queryParams")
     val data = call.response.content!!.fromJson<List<DraftDTO>>()

@@ -11,9 +11,11 @@ import io.ktor.routing.route
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
 
-fun Route.naisRoutes(readinessCheck: () -> Boolean,
-                     livenessCheck: () -> Boolean = { true },
-                     collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry) {
+fun Route.naisRoutes(
+    readinessCheck: () -> Boolean,
+    livenessCheck: () -> Boolean = { true },
+    collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
+) {
     route("internal") {
         get("/isAlive") {
             if (livenessCheck()) {
