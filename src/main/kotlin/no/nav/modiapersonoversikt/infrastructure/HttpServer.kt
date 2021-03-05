@@ -17,11 +17,13 @@ object HttpServer {
             naisApplication(appname, applicationState, module)
         }
 
-        Runtime.getRuntime().addShutdownHook(Thread {
-            log.info("Shutdown hook called, shutting down gracefully")
-            applicationState.initialized = false
-            applicationServer.stop(5000, 5000)
-        })
+        Runtime.getRuntime().addShutdownHook(
+            Thread {
+                log.info("Shutdown hook called, shutting down gracefully")
+                applicationState.initialized = false
+                applicationServer.stop(5000, 5000)
+            }
+        )
 
         return applicationServer
     }

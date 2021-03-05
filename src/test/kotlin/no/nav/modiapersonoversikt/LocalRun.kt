@@ -18,9 +18,9 @@ fun runLocally(useMock: Boolean) {
 
     HttpServer.create("modiapersonoversikt-draft", 7070) {
         draftApp(
-                configuration = Configuration(),
-                dataSource = dbConfig.userDataSource(),
-                useMock = useMock
+            configuration = Configuration(),
+            dataSource = dbConfig.userDataSource(),
+            useMock = useMock
         )
     }.start(wait = true)
 }

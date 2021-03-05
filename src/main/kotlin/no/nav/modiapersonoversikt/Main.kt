@@ -15,9 +15,9 @@ fun main() {
 
     HttpServer.create("modiapersonoversikt-draft", 7070) {
         draftApp(
-                configuration = configuration,
-                dataSource = dbConfig.userDataSource(),
-                useMock = false
+            configuration = configuration,
+            dataSource = dbConfig.userDataSource(),
+            useMock = false
         )
     }.start(wait = true)
 }

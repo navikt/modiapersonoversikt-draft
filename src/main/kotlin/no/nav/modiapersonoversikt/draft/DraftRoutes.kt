@@ -18,7 +18,7 @@ fun Route.draftRoutes(dao: DraftDAO) {
     authenticate {
         route("/draft") {
             get {
-                withSubject {subject ->
+                withSubject { subject ->
                     val (exact, context) = call.request.queryParameters.parse()
                     val dto = DraftIdentificatorDTO(subject, context)
                     val result = dao.get(dto.fromDTO(), exact)
@@ -48,16 +48,16 @@ fun Route.draftRoutes(dao: DraftDAO) {
 private fun Parameters.parse(): Pair<Boolean, DraftContext> {
     val exact = this["exact"]?.toBoolean() ?: true
     val context = this
-            .filter { key, value -> "exact" != key }
-            .toMap()
-            .mapValues { entry -> entry.value.first() }
+        .filter { key, value -> "exact" != key }
+        .toMap()
+        .mapValues { entry -> entry.value.first() }
 
     return Pair(exact, context)
 }
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.withSubject(body: suspend (subject: String) -> Unit) {
     this.call.principal<SubjectPrincipal>()
-            ?.subject
-            ?.let { body(it) }
-            ?: call.respond(HttpStatusCode.BadRequest)
+        ?.subject
+        ?.let { body(it) }
+        ?: call.respond(HttpStatusCode.BadRequest)
 }
