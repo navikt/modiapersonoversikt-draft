@@ -30,8 +30,8 @@ spec:
       cpu: 2000m
       memory: 512Mi
   ingresses:
-    - https://modiapersonoversikt-draft.nais.adeo.no
     - https://app.adeo.no/modiapersonoversikt-draft
+    - https://modia.adeo.no/modiapersonoversikt-draft
   replicas:
     min: 2
     max: 4
