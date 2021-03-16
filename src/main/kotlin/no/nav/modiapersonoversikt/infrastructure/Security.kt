@@ -48,7 +48,7 @@ object Security {
 
     internal fun useJwtFromCookie(call: ApplicationCall): HttpAuthHeader? {
         return try {
-            val token = cookieNames.find { call.request.cookies[it].isNullOrEmpty() }
+            val token = cookieNames.find { !call.request.cookies[it].isNullOrEmpty() }
             io.ktor.http.auth.parseAuthorizationHeader("Bearer $token")
         } catch (ex: Throwable) {
             log.warn("Could not get JWT from cookie '$cookieNames'", ex)
