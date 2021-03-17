@@ -33,7 +33,7 @@ fun Authentication.Configuration.setupJWT(jwksUrl: String) {
 }
 
 object Security {
-    private const val cookieName = "ID_token"
+    private val cookieNames = listOf("modia_ID_token", "ID_token")
 
     fun getSubject(call: ApplicationCall): String {
         return try {
@@ -48,10 +48,12 @@ object Security {
 
     internal fun useJwtFromCookie(call: ApplicationCall): HttpAuthHeader? {
         return try {
-            val token = call.request.cookies[cookieName]
+            val token = cookieNames
+                .find { !call.request.cookies[it].isNullOrEmpty() }
+                ?.let { cookieName ->  call.request.cookies[cookieName] }
             io.ktor.http.auth.parseAuthorizationHeader("Bearer $token")
         } catch (ex: Throwable) {
-            log.warn("Could not get JWT from cookie '$cookieName'", ex)
+            log.warn("Could not get JWT from cookie '$cookieNames'", ex)
             null
         }
     }
