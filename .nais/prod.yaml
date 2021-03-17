@@ -31,7 +31,6 @@ spec:
       memory: 512Mi
   ingresses:
     - https://app.adeo.no/modiapersonoversikt-draft
-    - https://modia.adeo.no/modiapersonoversikt-draft
   replicas:
     min: 2
     max: 4
