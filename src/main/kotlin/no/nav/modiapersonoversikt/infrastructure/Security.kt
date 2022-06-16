@@ -47,7 +47,9 @@ object Security {
     fun getSubject(call: ApplicationCall): String {
         return try {
             getToken(call)
-                ?.let { JWT.decode(it).getNavSubject() }
+                ?.let(Security::removeAuthScheme)
+                ?.let(JWT::decode)
+                ?.getIdent()
                 ?: "Unauthenticated"
         } catch (e: Throwable) {
             "Invalid JWT"
@@ -63,7 +65,7 @@ object Security {
     internal fun validateJWT(credentials: JWTCredential): Principal? {
         return try {
             requireNotNull(credentials.payload.audience) { "Audience not present" }
-            SubjectPrincipal(requireNotNull(credentials.payload.getNavSubject()))
+            SubjectPrincipal(requireNotNull(credentials.payload.getIdent()))
         } catch (e: Exception) {
             log.error("Failed to validateJWT token", e)
             null
@@ -87,13 +89,16 @@ object Security {
             }
     }
 
-    internal fun Payload.getNavSubject(): String? {
+    private fun Payload.getIdent(): String? {
         return getClaim("NAVident")?.asString() ?: subject
     }
 
-    private fun HttpAuthHeader.getBlob() = when {
-        this is HttpAuthHeader.Single -> blob
-        else -> null
+    private const val authscheme = "Bearer "
+    private fun removeAuthScheme(token: String): String {
+        if (token.startsWith(authscheme, ignoreCase = true)) {
+            return token.substring(authscheme.length)
+        }
+        return token
     }
 }
 
