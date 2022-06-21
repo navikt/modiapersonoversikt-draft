@@ -1,25 +1,25 @@
 package no.nav.modiapersonoversikt
 
-import io.ktor.application.Application
-import io.ktor.application.install
-import io.ktor.auth.Authentication
-import io.ktor.features.CORS
-import io.ktor.features.CallLogging
-import io.ktor.features.ContentNegotiation
-import io.ktor.features.StatusPages
-import io.ktor.http.ContentType
-import io.ktor.http.HttpMethod
-import io.ktor.jackson.JacksonConverter
-import io.ktor.metrics.dropwizard.DropwizardMetrics
-import io.ktor.request.path
-import io.ktor.routing.route
-import io.ktor.routing.routing
-import io.prometheus.client.dropwizard.DropwizardExports
+import io.ktor.http.*
+import io.ktor.serialization.jackson.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.metrics.micrometer.*
+import io.ktor.server.plugins.callloging.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.cors.routing.*
+import io.ktor.server.plugins.forwardedheaders.*
+import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.request.*
+import io.ktor.server.routing.*
 import kotlinx.coroutines.runBlocking
 import no.nav.modiapersonoversikt.config.Configuration
 import no.nav.modiapersonoversikt.draft.DraftDAOImpl
 import no.nav.modiapersonoversikt.draft.draftRoutes
 import no.nav.modiapersonoversikt.infrastructure.*
+import no.nav.modiapersonoversikt.infrastructure.HttpServer.metricsRegistry
+import no.nav.modiapersonoversikt.infrastructure.Security.AzureAd
+import no.nav.modiapersonoversikt.infrastructure.Security.OpenAM
 import no.nav.modiapersonoversikt.utils.JacksonUtils.objectMapper
 import no.nav.modiapersonoversikt.utils.minutes
 import no.nav.modiapersonoversikt.utils.schedule
@@ -32,7 +32,7 @@ fun Application.draftApp(
     dataSource: DataSource,
     useMock: Boolean = false
 ) {
-
+    install(XForwardedHeaders)
     install(StatusPages) {
         notFoundHandler()
         exceptionHandler()
@@ -40,15 +40,17 @@ fun Application.draftApp(
 
     install(CORS) {
         anyHost()
-        method(HttpMethod.Post)
-        method(HttpMethod.Delete)
+        allowMethod(HttpMethod.Post)
+        allowMethod(HttpMethod.Delete)
     }
 
     install(Authentication) {
         if (useMock) {
-            setupMock(SubjectPrincipal("Z999999"))
+            setupMock(OpenAM, SubjectPrincipal("Z999999"))
+            setupMock(AzureAd, SubjectPrincipal("Z999999"))
         } else {
-            setupJWT(configuration.jwksUrl)
+            configuration.openam.let(::setupJWT)
+            configuration.azuread?.let(::setupJWT)
         }
     }
 
@@ -58,12 +60,13 @@ fun Application.draftApp(
 
     install(CallLogging) {
         level = Level.INFO
+        disableDefaultColors()
         filter { call -> call.request.path().startsWith("/modiapersonoversikt-draft/api") }
         mdc("userId", Security::getSubject)
     }
 
-    install(DropwizardMetrics) {
-        io.prometheus.client.CollectorRegistry.defaultRegistry.register(DropwizardExports(registry))
+    install(MicrometerMetrics) {
+        registry = metricsRegistry
     }
 
     val draftDAO = DraftDAOImpl(dataSource)
@@ -77,7 +80,7 @@ fun Application.draftApp(
     routing {
         route("modiapersonoversikt-draft") {
             route("api") {
-                draftRoutes(draftDAO)
+                draftRoutes(configuration.authproviders, draftDAO)
             }
         }
     }

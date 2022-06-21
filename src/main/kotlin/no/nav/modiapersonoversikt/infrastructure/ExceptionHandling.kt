@@ -1,28 +1,27 @@
 package no.nav.modiapersonoversikt.infrastructure
 
-import io.ktor.application.ApplicationCall
-import io.ktor.application.call
-import io.ktor.features.StatusPages
-import io.ktor.features.origin
 import io.ktor.http.HttpStatusCode
-import io.ktor.request.ApplicationRequest
-import io.ktor.response.respond
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.plugins.origin
+import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.request.ApplicationRequest
+import io.ktor.server.response.respond
 import no.nav.modiapersonoversikt.log
 
-fun StatusPages.Configuration.exceptionHandler() {
-    exception<Throwable> { cause ->
+fun StatusPagesConfig.exceptionHandler() {
+    exception<Throwable> { call, cause ->
         call.logErrorAndRespond(cause) { "An internal error occurred during routing" }
     }
 
-    exception<IllegalArgumentException> { cause ->
+    exception<IllegalArgumentException> { call, cause ->
         call.logErrorAndRespond(cause, HttpStatusCode.BadRequest) {
             "The request was either invalid or lacked required parameters"
         }
     }
 }
 
-fun StatusPages.Configuration.notFoundHandler() {
-    status(HttpStatusCode.NotFound) {
+fun StatusPagesConfig.notFoundHandler() {
+    status(HttpStatusCode.NotFound) { call, _ ->
         call.respond(
             HttpStatusCode.NotFound,
             HttpErrorResponse(

@@ -2,16 +2,19 @@ package no.nav.modiapersonoversikt
 
 import no.nav.modiapersonoversikt.config.Configuration
 import no.nav.modiapersonoversikt.config.DataSourceConfiguration
+import no.nav.modiapersonoversikt.config.DatabaseConfig
 import no.nav.modiapersonoversikt.infrastructure.HttpServer
 import org.testcontainers.containers.PostgreSQLContainer
 
-class SpecifiedPostgreSQLContainer : PostgreSQLContainer<SpecifiedPostgreSQLContainer>("postgres:9.6.12")
+class SpecifiedPostgreSQLContainer : PostgreSQLContainer<SpecifiedPostgreSQLContainer>("postgres:14.3-alpine")
 
 fun runLocally(useMock: Boolean) {
     val db = SpecifiedPostgreSQLContainer()
     db.start()
 
-    val configuration = Configuration(jdbcUrl = db.jdbcUrl)
+    val configuration = Configuration(
+        database = DatabaseConfig(jdbcUrl = db.jdbcUrl)
+    )
     val dbConfig = DataSourceConfiguration(configuration)
 
     DataSourceConfiguration.migrateDb(configuration, dbConfig.adminDataSource())

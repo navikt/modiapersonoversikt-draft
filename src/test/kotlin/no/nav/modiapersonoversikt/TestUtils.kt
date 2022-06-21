@@ -1,12 +1,12 @@
 package no.nav.modiapersonoversikt
 
-import io.ktor.application.Application
-import io.ktor.server.testing.TestApplicationEngine
-import io.ktor.server.testing.withTestApplication
+import io.ktor.server.application.Application
+import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import no.nav.modiapersonoversikt.config.Configuration
 import no.nav.modiapersonoversikt.config.DataSourceConfiguration
+import no.nav.modiapersonoversikt.config.DatabaseConfig
 import no.nav.modiapersonoversikt.draft.Draft
 import no.nav.modiapersonoversikt.draft.DraftDTO
 import no.nav.modiapersonoversikt.draft.toDTO
@@ -26,7 +26,7 @@ import kotlin.math.abs
 interface WithDatabase {
     companion object {
         private val postgreSQLContainer = SpecifiedPostgreSQLContainer().apply { start() }
-        private val configuration = Configuration(jdbcUrl = postgreSQLContainer.jdbcUrl)
+        private val configuration = Configuration(database = DatabaseConfig(jdbcUrl = postgreSQLContainer.jdbcUrl))
         private val dbConfig = DataSourceConfiguration(configuration)
 
         @BeforeAll
@@ -49,10 +49,10 @@ interface WithDatabase {
     fun connectionUrl(): String = postgreSQLContainer.jdbcUrl
 }
 
-fun <R> withTestApp(jdbcUrl: String? = null, test: TestApplicationEngine.() -> R): R {
+fun <R> withTestApp(jdbcUrl: String? = null, test: suspend ApplicationTestBuilder.() -> R) {
     val dataAwareApp = fun Application.() {
         if (jdbcUrl != null) {
-            val config = Configuration(jdbcUrl = jdbcUrl)
+            val config = Configuration(database = DatabaseConfig(jdbcUrl = jdbcUrl))
             val dbConfig = DataSourceConfiguration(config)
             draftApp(config, dbConfig.userDataSource(), true)
         }
@@ -62,8 +62,10 @@ fun <R> withTestApp(jdbcUrl: String? = null, test: TestApplicationEngine.() -> R
         naisApplication("modiapersonoversikt-draft", ApplicationState()) {}
         dataAwareApp()
     }
-
-    return withTestApplication(moduleFunction, test)
+    testApplication {
+        application(moduleFunction)
+        test()
+    }
 }
 
 fun assertDraftMatches(expected: Draft, actuals: List<Draft>, delta: Int = 1000) {

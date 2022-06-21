@@ -36,6 +36,22 @@ spec:
     min: 1
     max: 1
     cpuThresholdPercentage: 90
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
+      claims:
+        extra:
+          - "NAVident"
+  accessPolicy:
+    inbound:
+      rules:
+        - application: modiapersonoversikt-q0
+          namespace: personoversikt
+          cluster: dev-fss
+        - application: modiapersonoversikt-q1
+          namespace: personoversikt
+          cluster: dev-fss
   vault:
     enabled: true
     paths:

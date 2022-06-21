@@ -1,15 +1,19 @@
 package no.nav.modiapersonoversikt.infrastructure
 
-import io.ktor.application.Application
-import io.ktor.routing.route
-import io.ktor.routing.routing
+import io.ktor.server.application.Application
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.server.routing.route
+import io.ktor.server.routing.routing
+import io.micrometer.prometheus.PrometheusConfig
+import io.micrometer.prometheus.PrometheusMeterRegistry
 import no.nav.modiapersonoversikt.log
 
 data class ApplicationState(var running: Boolean = true, var initialized: Boolean = false)
 object HttpServer {
+    val metricsRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+
     fun create(appname: String, port: Int, module: Application.() -> Unit): ApplicationEngine {
         val applicationState = ApplicationState()
 
