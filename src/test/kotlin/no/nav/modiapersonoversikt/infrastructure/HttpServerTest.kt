@@ -1,7 +1,7 @@
 package no.nav.modiapersonoversikt.infrastructure
 
-import io.ktor.http.HttpMethod
-import io.ktor.server.testing.handleRequest
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import no.nav.modiapersonoversikt.withTestApp
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -10,19 +10,16 @@ class HttpServerTest {
     @Test
     fun `nais-app should have isAlive, isReady, metrics`() {
         withTestApp {
-            handleRequest(HttpMethod.Get, "/modiapersonoversikt-draft/internal/isAlive").apply {
-                assertEquals(response.status()?.value, 200)
-                assertEquals(response.content, "Alive")
-            }
+            val isAlive = client.get("/modiapersonoversikt-draft/internal/isAlive")
+            assertEquals(isAlive.status.value, 200)
+            assertEquals(isAlive.bodyAsText(), "Alive")
 
-            handleRequest(HttpMethod.Get, "/modiapersonoversikt-draft/internal/isReady").apply {
-                assertEquals(response.status()?.value, 200)
-                assertEquals(response.content, "Ready")
-            }
+            val isReady = client.get("/modiapersonoversikt-draft/internal/isReady")
+            assertEquals(isReady.status.value, 200)
+            assertEquals(isReady.bodyAsText(), "Ready")
 
-            handleRequest(HttpMethod.Get, "/modiapersonoversikt-draft/internal/metrics").apply {
-                assertEquals(response.status()?.value, 200)
-            }
+            val metrics = client.get("/modiapersonoversikt-draft/internal/metrics")
+            assertEquals(metrics.status.value, 200)
         }
     }
 }

@@ -15,16 +15,16 @@ class DataSourceConfiguration(val env: Configuration) {
     fun adminDataSource() = adminDataSource
 
     private fun createDatasource(user: String): DataSource {
-        val mountPath = env.vaultMountpath
+        val mountPath = env.database.vaultMountpath
         val config = HikariConfig()
-        config.jdbcUrl = env.jdbcUrl
+        config.jdbcUrl = env.database.jdbcUrl
         config.minimumIdle = 0
         config.maximumPoolSize = 4
         config.connectionTimeout = 5000
         config.maxLifetime = 30000
         config.isAutoCommit = false
 
-        log.info("Creating DataSource to: ${env.jdbcUrl}")
+        log.info("Creating DataSource to: ${env.database.jdbcUrl}")
 
         if (env.clusterName == "local") {
             config.username = "test"

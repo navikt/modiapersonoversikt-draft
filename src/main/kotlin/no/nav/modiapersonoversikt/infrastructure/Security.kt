@@ -3,58 +3,56 @@ package no.nav.modiapersonoversikt.infrastructure
 import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
 import com.auth0.jwt.JWT
-import com.auth0.jwt.impl.JWTParser
-import com.auth0.jwt.interfaces.DecodedJWT
 import com.auth0.jwt.interfaces.Payload
-import io.ktor.application.ApplicationCall
-import io.ktor.auth.Authentication
-import io.ktor.auth.Principal
-import io.ktor.auth.jwt.JWTCredential
-import io.ktor.auth.jwt.jwt
-import io.ktor.http.auth.HttpAuthHeader
+import io.ktor.http.*
+import io.ktor.http.auth.*
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.JWTCredential
+import io.ktor.server.auth.jwt.jwt
+import io.ktor.server.request.*
+import no.nav.modiapersonoversikt.config.AuthProviderConfig
 import no.nav.modiapersonoversikt.log
 import java.net.URL
-import java.util.*
 import java.util.concurrent.TimeUnit
 
-fun Authentication.Configuration.setupMock(mockPrincipal: SubjectPrincipal) {
-    mock {
-        principal = mockPrincipal
-    }
+fun AuthenticationConfig.setupMock(name: String? = null, principal: SubjectPrincipal) {
+    val config = object : AuthenticationProvider.Config(name) {}
+    register(
+        object : AuthenticationProvider(config) {
+            override suspend fun onAuthenticate(context: AuthenticationContext) {
+                context.principal = principal
+            }
+        }
+    )
 }
 
-fun Authentication.Configuration.setupJWT(jwksUrl: String) {
-    jwt {
-        authHeader(Security::useJwtFromCookie)
-        verifier(Security.makeJwkProvider(jwksUrl))
-        realm = "modiapersonoversikt-draft"
+fun AuthenticationConfig.setupJWT(config: AuthProviderConfig) {
+    jwt(config.name) {
+        if (config.usesCookies) {
+            authHeader {
+                Security.getToken(it)?.let(::parseAuthorizationHeader)
+            }
+        }
+        verifier(Security.makeJwkProvider(config.jwksUrl))
         validate { Security.validateJWT(it) }
     }
 }
 
 object Security {
+    const val OpenAM = "openam"
+    const val AzureAd = "azuread"
     private val cookieNames = listOf("modia_ID_token", "ID_token")
 
     fun getSubject(call: ApplicationCall): String {
         return try {
-            useJwtFromCookie(call)
-                ?.getBlob()
-                ?.let { blob -> JWT.decode(blob).parsePayload().subject }
+            getToken(call)
+                ?.let(Security::removeAuthScheme)
+                ?.let(JWT::decode)
+                ?.getIdent()
                 ?: "Unauthenticated"
         } catch (e: Throwable) {
             "Invalid JWT"
-        }
-    }
-
-    internal fun useJwtFromCookie(call: ApplicationCall): HttpAuthHeader? {
-        return try {
-            val token = cookieNames
-                .find { !call.request.cookies[it].isNullOrEmpty() }
-                ?.let { cookieName ->  call.request.cookies[cookieName] }
-            io.ktor.http.auth.parseAuthorizationHeader("Bearer $token")
-        } catch (ex: Throwable) {
-            log.warn("Could not get JWT from cookie '$cookieNames'", ex)
-            null
         }
     }
 
@@ -67,21 +65,40 @@ object Security {
     internal fun validateJWT(credentials: JWTCredential): Principal? {
         return try {
             requireNotNull(credentials.payload.audience) { "Audience not present" }
-            SubjectPrincipal(credentials.payload.subject)
+            SubjectPrincipal(requireNotNull(credentials.payload.getIdent()))
         } catch (e: Exception) {
             log.error("Failed to validateJWT token", e)
             null
         }
     }
 
-    private fun HttpAuthHeader.getBlob() = when {
-        this is HttpAuthHeader.Single -> blob
-        else -> null
+    internal fun getToken(call: ApplicationCall): String? {
+        val headerToken = call.request.header(HttpHeaders.Authorization)
+        if (headerToken != null) {
+            return headerToken
+        }
+        return cookieNames
+            .find { !call.request.cookies[it].isNullOrEmpty() }
+            ?.let { call.request.cookies[it] }
+            ?.let {
+                if (it.startsWith("bearer", ignoreCase = true)) {
+                    it
+                } else {
+                    "Bearer $it"
+                }
+            }
     }
 
-    private fun DecodedJWT.parsePayload(): Payload {
-        val payloadString = String(Base64.getUrlDecoder().decode(payload))
-        return JWTParser().parsePayload(payloadString)
+    private fun Payload.getIdent(): String? {
+        return getClaim("NAVident")?.asString() ?: subject
+    }
+
+    private const val authscheme = "Bearer "
+    private fun removeAuthScheme(token: String): String {
+        if (token.startsWith(authscheme, ignoreCase = true)) {
+            return token.substring(authscheme.length)
+        }
+        return token
     }
 }
 

@@ -1,6 +1,9 @@
 package no.nav.modiapersonoversikt
 
-import io.ktor.http.HttpMethod
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.testing.*
 import no.nav.modiapersonoversikt.draft.DraftContext
 import no.nav.modiapersonoversikt.draft.DraftDTO
@@ -70,23 +73,21 @@ class ApplicationTest : WithDatabase {
 }
 
 class JsonResponse<T>(
-    call: TestApplicationCall,
-    val data: T
-) {
-    val status = call.response.status()?.value ?: -1
-}
+    val status: Int,
+    val data: T,
+)
 
-fun TestApplicationEngine.saveDraft(draft: SaveDraftDTO): JsonResponse<DraftDTO> {
-    val call = handleRequest(HttpMethod.Post, "/modiapersonoversikt-draft/api/draft") {
-        addHeader("Content-Type", "application/json")
+suspend fun ApplicationTestBuilder.saveDraft(draft: SaveDraftDTO): JsonResponse<DraftDTO> {
+    val response = client.post("/modiapersonoversikt-draft/api/draft") {
+        contentType(ContentType.Application.Json)
         setBody(draft.toJson())
     }
-    val data = call.response.content!!.fromJson<DraftDTO>()
+    val data = response.bodyAsText().fromJson<DraftDTO>()
 
-    return JsonResponse(call, data)
+    return JsonResponse(response.status.value, data)
 }
 
-fun TestApplicationEngine.getDrafts(exact: Boolean? = null, context: DraftContext = emptyMap()): JsonResponse<List<DraftDTO>> {
+suspend fun ApplicationTestBuilder.getDrafts(exact: Boolean? = null, context: DraftContext = emptyMap()): JsonResponse<List<DraftDTO>> {
     val params = context.toMutableMap()
     if (exact != null) {
         params["exact"] = exact.toString()
@@ -97,8 +98,8 @@ fun TestApplicationEngine.getDrafts(exact: Boolean? = null, context: DraftContex
         .joinToString("&")
         .let { if (it.isNotEmpty()) "?$it" else "" }
 
-    val call = handleRequest(HttpMethod.Get, "/modiapersonoversikt-draft/api/draft$queryParams")
-    val data = call.response.content!!.fromJson<List<DraftDTO>>()
+    val response = client.get("/modiapersonoversikt-draft/api/draft$queryParams")
+    val data = response.bodyAsText().fromJson<List<DraftDTO>>()
 
-    return JsonResponse(call, data)
+    return JsonResponse(response.status.value, data)
 }

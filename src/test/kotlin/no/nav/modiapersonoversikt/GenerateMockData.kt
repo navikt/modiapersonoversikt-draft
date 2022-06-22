@@ -4,6 +4,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import no.nav.modiapersonoversikt.config.Configuration
 import no.nav.modiapersonoversikt.config.DataSourceConfiguration
+import no.nav.modiapersonoversikt.config.DatabaseConfig
 import no.nav.modiapersonoversikt.draft.DraftDAOImpl
 import no.nav.modiapersonoversikt.draft.SaveDraft
 import java.util.*
@@ -13,7 +14,7 @@ const val NOF_CONTEXT = 30
 
 fun main() {
     val jdbcUrl = "jdbc:postgresql://localhost:32834/test"
-    val configuration = Configuration(jdbcUrl = jdbcUrl)
+    val configuration = Configuration(database = DatabaseConfig(jdbcUrl = jdbcUrl))
     val dbConfig = DataSourceConfiguration(configuration)
     val dao = DraftDAOImpl(dbConfig.userDataSource())
 

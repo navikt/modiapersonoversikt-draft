@@ -1,21 +1,21 @@
 package no.nav.modiapersonoversikt.draft
 
-import io.ktor.application.ApplicationCall
-import io.ktor.application.call
-import io.ktor.auth.authenticate
-import io.ktor.auth.principal
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Parameters
-import io.ktor.request.receive
-import io.ktor.response.respond
-import io.ktor.routing.*
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.call
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.principal
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.routing.*
 import io.ktor.util.filter
 import io.ktor.util.pipeline.PipelineContext
 import io.ktor.util.toMap
 import no.nav.modiapersonoversikt.infrastructure.SubjectPrincipal
 
-fun Route.draftRoutes(dao: DraftDAO) {
-    authenticate {
+fun Route.draftRoutes(authProviders: Array<String>, dao: DraftDAO) {
+    authenticate(*authProviders) {
         route("/draft") {
             get {
                 withSubject { subject ->
