@@ -10,6 +10,3 @@ En tjeneste for å ta vare på kladd for modiapersonoversikt.
 Spørsmål knyttet til koden eller prosjektet kan rettes mot:
 
 [Team Personoversikt](https://github.com/navikt/info-team-personoversikt)
-
-### For NAV-ansatte
-Interne henvendelser kan sendes via Slack i kanalen #team-personoversikt.
