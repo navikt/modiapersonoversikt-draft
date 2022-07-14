@@ -1,5 +1,6 @@
 package no.nav.modiapersonoversikt.draft
 
+import kotlinx.coroutines.runBlocking
 import kotliquery.TransactionalSession
 import kotliquery.action.ResultQueryActionBuilder
 import kotliquery.queryOf
@@ -8,11 +9,22 @@ import no.nav.modiapersonoversikt.utils.execute
 import no.nav.modiapersonoversikt.utils.fromJson
 import no.nav.modiapersonoversikt.utils.toJson
 import no.nav.modiapersonoversikt.utils.transactional
+import no.nav.personoversikt.ktor.utils.Selftest
 import javax.sql.DataSource
+import kotlin.concurrent.fixedRateTimer
+import kotlin.time.Duration.Companion.seconds
 
 private const val table = "draft"
 
 class DraftDAOImpl(private val dataSource: DataSource) : DraftDAO {
+    private val selftest = Selftest.Reporter("Database", true)
+
+    init {
+        fixedRateTimer("Database check", daemon = true, initialDelay = 0, period = 10.seconds.inWholeMilliseconds) {
+            runBlocking { ping() }
+        }
+    }
+
     override suspend fun save(data: SaveDraft): Draft {
         return transactional(dataSource) { tx ->
             delete(tx, data.toDraftIdentificator())
@@ -34,6 +46,20 @@ class DraftDAOImpl(private val dataSource: DataSource) : DraftDAO {
             log.info("Deleting old drafts")
             val deletedLines = tx.run(queryOf("DELETE FROM $table WHERE created < now() - INTERVAL '4 HOUR'").asUpdate)
             log.info("Deleted old drafts: $deletedLines")
+        }
+    }
+
+    private suspend fun ping() {
+        try {
+            get(
+                DraftIdentificator(
+                    owner = "Z999999",
+                    context = emptyMap()
+                )
+            )
+            selftest.reportOk()
+        } catch (e: Throwable) {
+            selftest.reportError(e)
         }
     }
 }
