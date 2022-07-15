@@ -2,14 +2,15 @@ package no.nav.modiapersonoversikt.infrastructure
 
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import no.nav.modiapersonoversikt.WithDatabase
 import no.nav.modiapersonoversikt.withTestApp
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class HttpServerTest {
+class HttpServerTest : WithDatabase {
     @Test
     fun `nais-app should have isAlive, isReady, metrics`() {
-        withTestApp {
+        withTestApp(connectionUrl()) {
             val isAlive = client.get("/modiapersonoversikt-draft/internal/isAlive")
             assertEquals(isAlive.status.value, 200)
             assertEquals(isAlive.bodyAsText(), "Alive")

@@ -10,8 +10,6 @@ import no.nav.modiapersonoversikt.config.DatabaseConfig
 import no.nav.modiapersonoversikt.draft.Draft
 import no.nav.modiapersonoversikt.draft.DraftDTO
 import no.nav.modiapersonoversikt.draft.toDTO
-import no.nav.modiapersonoversikt.infrastructure.ApplicationState
-import no.nav.modiapersonoversikt.infrastructure.naisApplication
 import no.nav.modiapersonoversikt.utils.transactional
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -59,7 +57,6 @@ fun <R> withTestApp(jdbcUrl: String? = null, test: suspend ApplicationTestBuilde
     }
 
     val moduleFunction: Application.() -> Unit = {
-        naisApplication("modiapersonoversikt-draft", ApplicationState()) {}
         dataAwareApp()
     }
     testApplication {

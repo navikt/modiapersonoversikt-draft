@@ -1,9 +1,10 @@
 package no.nav.modiapersonoversikt
 
+import io.ktor.server.netty.*
 import no.nav.modiapersonoversikt.config.Configuration
 import no.nav.modiapersonoversikt.config.DataSourceConfiguration
 import no.nav.modiapersonoversikt.config.DatabaseConfig
-import no.nav.modiapersonoversikt.infrastructure.HttpServer
+import no.nav.personoversikt.ktor.utils.KtorServer
 import org.testcontainers.containers.PostgreSQLContainer
 
 class SpecifiedPostgreSQLContainer : PostgreSQLContainer<SpecifiedPostgreSQLContainer>("postgres:14.3-alpine")
@@ -19,9 +20,9 @@ fun runLocally(useMock: Boolean) {
 
     DataSourceConfiguration.migrateDb(configuration, dbConfig.adminDataSource())
 
-    HttpServer.create("modiapersonoversikt-draft", 7070) {
+    KtorServer.create(Netty, 7070) {
         draftApp(
-            configuration = Configuration(),
+            configuration = configuration,
             dataSource = dbConfig.userDataSource(),
             useMock = useMock
         )

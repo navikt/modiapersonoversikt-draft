@@ -4,7 +4,6 @@ import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
@@ -16,22 +15,26 @@ import kotlinx.coroutines.runBlocking
 import no.nav.modiapersonoversikt.config.Configuration
 import no.nav.modiapersonoversikt.draft.DraftDAOImpl
 import no.nav.modiapersonoversikt.draft.draftRoutes
-import no.nav.modiapersonoversikt.infrastructure.*
-import no.nav.modiapersonoversikt.infrastructure.HttpServer.metricsRegistry
-import no.nav.modiapersonoversikt.infrastructure.Security.AzureAd
-import no.nav.modiapersonoversikt.infrastructure.Security.OpenAM
+import no.nav.modiapersonoversikt.infrastructure.exceptionHandler
+import no.nav.modiapersonoversikt.infrastructure.notFoundHandler
 import no.nav.modiapersonoversikt.utils.JacksonUtils.objectMapper
-import no.nav.modiapersonoversikt.utils.minutes
-import no.nav.modiapersonoversikt.utils.schedule
+import no.nav.personoversikt.ktor.utils.Metrics
+import no.nav.personoversikt.ktor.utils.Selftest
 import org.slf4j.event.Level
-import java.util.*
 import javax.sql.DataSource
+import kotlin.concurrent.fixedRateTimer
+import kotlin.time.Duration.Companion.minutes
 
 fun Application.draftApp(
     configuration: Configuration,
     dataSource: DataSource,
     useMock: Boolean = false
 ) {
+    val security = no.nav.personoversikt.ktor.utils.Security(listOfNotNull(
+        configuration.openam,
+        configuration.azuread,
+    ))
+
     install(XForwardedHeaders)
     install(StatusPages) {
         notFoundHandler()
@@ -44,13 +47,22 @@ fun Application.draftApp(
         allowMethod(HttpMethod.Delete)
     }
 
+    install(Metrics.Plugin) {
+        contextpath = appContextpath
+    }
+
+    install(Selftest.Plugin) {
+        appname = appName
+        contextpath = appContextpath
+        version = appImage
+    }
+
+
     install(Authentication) {
         if (useMock) {
-            setupMock(OpenAM, SubjectPrincipal("Z999999"))
-            setupMock(AzureAd, SubjectPrincipal("Z999999"))
+            security.setupMock(this, "Z999999")
         } else {
-            configuration.openam.let(::setupJWT)
-            configuration.azuread?.let(::setupJWT)
+            security.setupJWT(this)
         }
     }
 
@@ -62,25 +74,25 @@ fun Application.draftApp(
         level = Level.INFO
         disableDefaultColors()
         filter { call -> call.request.path().startsWith("/modiapersonoversikt-draft/api") }
-        mdc("userId", Security::getSubject)
-    }
-
-    install(MicrometerMetrics) {
-        registry = metricsRegistry
+        mdc("userId") { call -> security.getSubject(call).joinToString(";") }
     }
 
     val draftDAO = DraftDAOImpl(dataSource)
 
-    Timer().schedule(delay = 5.minutes, period = 10.minutes) {
+    fixedRateTimer(
+        daemon = true,
+        initialDelay = 5.minutes.inWholeMilliseconds,
+        period = 10.minutes.inWholeMilliseconds
+    ) {
         runBlocking {
             draftDAO.deleteOldDrafts()
         }
     }
 
     routing {
-        route("modiapersonoversikt-draft") {
+        route(appContextpath) {
             route("api") {
-                draftRoutes(configuration.authproviders, draftDAO)
+                draftRoutes(security.authproviders, draftDAO)
             }
         }
     }
