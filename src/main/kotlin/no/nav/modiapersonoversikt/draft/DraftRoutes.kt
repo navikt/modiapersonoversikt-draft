@@ -12,9 +12,9 @@ import io.ktor.server.routing.*
 import io.ktor.util.filter
 import io.ktor.util.pipeline.PipelineContext
 import io.ktor.util.toMap
-import no.nav.modiapersonoversikt.infrastructure.SubjectPrincipal
+import no.nav.personoversikt.ktor.utils.Security.SubjectPrincipal
 
-fun Route.draftRoutes(authProviders: Array<String>, dao: DraftDAO) {
+fun Route.draftRoutes(authProviders: Array<String?>, dao: DraftDAO) {
     authenticate(*authProviders) {
         route("/draft") {
             get {

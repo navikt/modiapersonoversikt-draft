@@ -1,19 +1,38 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val mainClass = "no.nav.modiapersonoversikt.MainKt"
-val kotlinVersion = "1.7.0"
-val ktorVersion = "2.0.2"
+val kotlinVersion = "1.7.10"
+val ktorVersion = "2.0.3"
 val prometheusVersion = "1.9.0"
 val logbackVersion = "1.2.11"
 val logstashVersion = "7.2"
+val modiaCommonVersion = "1.2022.07.15-09.01-9ead52c51549"
 
 plugins {
-    kotlin("jvm") version "1.7.0"
+    kotlin("jvm") version "1.7.10"
     idea
 }
 
 repositories {
     mavenCentral()
+    mavenLocal()
+
+    val githubToken = System.getenv("GITHUB_TOKEN")
+    if (githubToken.isNullOrEmpty()) {
+        maven {
+            name = "external-mirror-github-navikt"
+            url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
+        }
+    } else {
+        maven {
+            name = "github-package-registry-navikt"
+            url = uri("https://maven.pkg.github.com/navikt/maven-release")
+            credentials {
+                username = "token"
+                password = githubToken
+            }
+        }
+    }
 }
 
 idea {
@@ -39,6 +58,10 @@ dependencies {
 
     implementation("io.ktor:ktor-server-metrics-micrometer:$ktorVersion")
     implementation("io.micrometer:micrometer-registry-prometheus:$prometheusVersion")
+
+    implementation("no.nav.personoversikt:ktor-utils:$modiaCommonVersion")
+    implementation("no.nav.personoversikt:kotlin-utils:$modiaCommonVersion")
+    implementation("no.nav.personoversikt:crypto:$modiaCommonVersion")
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashVersion")
