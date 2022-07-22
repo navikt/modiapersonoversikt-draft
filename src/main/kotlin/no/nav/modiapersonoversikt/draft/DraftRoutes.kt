@@ -53,7 +53,7 @@ fun Route.draftRoutes(authProviders: Array<String?>, dao: DraftDAO, uuidDAO: Uui
     authenticate(*authProviders) {
         get("/generate-uid") {
             withSubject { subject ->
-                call.respond(uuidDAO.generateUid(subject).toString())
+                call.respond(uuidDAO.generateUid(subject).uuid.toString())
             }
         }
     }
