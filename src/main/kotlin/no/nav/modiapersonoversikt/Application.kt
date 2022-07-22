@@ -17,6 +17,7 @@ import no.nav.modiapersonoversikt.config.Configuration
 import no.nav.modiapersonoversikt.draft.DraftDAOImpl
 import no.nav.modiapersonoversikt.draft.UuidDAOImpl
 import no.nav.modiapersonoversikt.draft.draftRoutes
+import no.nav.modiapersonoversikt.infrastructure.UUIDPrincipal
 import no.nav.modiapersonoversikt.infrastructure.exceptionHandler
 import no.nav.modiapersonoversikt.infrastructure.notFoundHandler
 import no.nav.modiapersonoversikt.utils.JacksonUtils.objectMapper
@@ -73,9 +74,10 @@ fun Application.draftApp(
         }
         basic("ws") {
             validate {
-                val uuid = UUID.fromString(it.name)
-                val user = uuidDAO.getOwner(uuid)
-                user?.let(::UserIdPrincipal)
+                UUIDPrincipal(UUID.fromString(it.name))
+//                val uuid = UUID.fromString(it.name)
+//                val user = uuidDAO.getOwner(uuid)
+//                user?.let(::UserIdPrincipal)
             }
         }
     }

@@ -4,11 +4,11 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 interface UuidDAO {
-    suspend fun generateUid(owner: String): UUID
-    suspend fun getOwner(uuid: UUID): String?
+    suspend fun generateUid(owner: String): OwnerUUID
+    suspend fun getOwner(uuid: UUID): OwnerUUID?
     suspend fun deleteExpired(): Int
 
-    data class TableRow(
+    data class OwnerUUID(
         val owner: String,
         val uuid: UUID,
         val created: LocalDateTime
