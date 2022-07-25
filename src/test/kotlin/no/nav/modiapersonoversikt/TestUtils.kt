@@ -11,10 +11,10 @@ import no.nav.modiapersonoversikt.draft.Draft
 import no.nav.modiapersonoversikt.draft.DraftDTO
 import no.nav.modiapersonoversikt.draft.toDTO
 import no.nav.modiapersonoversikt.utils.transactional
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertAll
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -34,11 +34,12 @@ interface WithDatabase {
         }
     }
 
-    @BeforeEach
+    @AfterEach
     fun clearDatabase() {
         runBlocking {
             transactional(dbConfig.adminDataSource()) { tx ->
                 tx.run(queryOf("DELETE FROM draft").asExecute)
+                tx.run(queryOf("DELETE FROM owneruuid").asExecute)
             }
         }
     }
