@@ -2,7 +2,6 @@ package no.nav.modiapersonoversikt.config
 
 import io.ktor.http.*
 import no.nav.modiapersonoversikt.AzureAd
-import no.nav.modiapersonoversikt.OidcTest
 import no.nav.modiapersonoversikt.OpenAM
 import no.nav.personoversikt.ktor.utils.Security
 import no.nav.personoversikt.ktor.utils.Security.AuthProviderConfig
@@ -35,7 +34,7 @@ class Configuration(
             Security.TokenLocation.Cookie(name = "ID_token"),
         )
     ),
-    val azuread: AuthProviderConfig? = getConfig("AZURE_APP_WELL_KNOWN_URL--DISABLE")?.let { jwksurl ->
+    val azuread: AuthProviderConfig? = getConfig("AZURE_APP_WELL_KNOWN_URL")?.let { jwksurl ->
         AuthProviderConfig(
             name = AzureAd,
             jwksConfig = Security.JwksConfig.OidcWellKnownUrl(jwksurl),
@@ -45,6 +44,4 @@ class Configuration(
         )
     },
     val database: DatabaseConfig = DatabaseConfig()
-) {
-    val oidcTest = getConfig("AZURE_APP_WELL_KNOWN_URL")?.let(::OidcTest)
-}
+)

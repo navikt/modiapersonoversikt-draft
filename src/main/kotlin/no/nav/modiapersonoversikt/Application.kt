@@ -10,7 +10,6 @@ import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.forwardedheaders.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
-import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import kotlinx.coroutines.runBlocking
@@ -110,10 +109,6 @@ fun Application.draftApp(
         route(appContextpath) {
             route("api") {
                 draftRoutes(security.authproviders, draftDAO, uuidDAO)
-                get("test") {
-                    println(configuration.oidcTest?.fetchConfig() ?: "No config found")
-                    call.respond(HttpStatusCode.OK)
-                }
             }
         }
     }
