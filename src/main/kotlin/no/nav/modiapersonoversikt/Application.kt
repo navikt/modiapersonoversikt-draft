@@ -75,9 +75,6 @@ fun Application.draftApp(
         basic("ws") {
             validate {
                 UUIDPrincipal(UUID.fromString(it.name))
-//                val uuid = UUID.fromString(it.name)
-//                val user = uuidDAO.getOwner(uuid)
-//                user?.let(::UserIdPrincipal)
             }
         }
     }
