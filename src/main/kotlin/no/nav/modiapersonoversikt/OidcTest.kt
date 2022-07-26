@@ -16,17 +16,16 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.net.URL
 
-class OidcTest(val url: String, engine: HttpClientEngine = CIO.create()) {
-    private val httpClient = HttpClient(engine) {
-        engine {
-            val httpProxy = System.getenv("HTTP_PROXY")
-            log.info("OidcWellKnownUrl will use proxy: $httpProxy")
-            httpProxy?.let { proxy = ProxyBuilder.http(Url(it)) }
-        }
-    }
-
+class OidcTest(val url: String, val engine: HttpClientEngine = CIO.create()) {
     suspend fun fetchConfig(): String {
         val httpProxy = System.getenv("HTTP_PROXY")
+        val httpClient = HttpClient(engine) {
+            engine {
+                val httpProxy = System.getenv("HTTP_PROXY")
+                log.info("OidcWellKnownUrl will use proxy: $httpProxy")
+                httpProxy?.let { proxy = ProxyBuilder.http(Url(it)) }
+            }
+        }
         return httpClient
             .runCatching { get(URL(url)).bodyAsText() }
             .onFailure { log.error("Could not fetch oidc-config from $url through $httpProxy", it) }
