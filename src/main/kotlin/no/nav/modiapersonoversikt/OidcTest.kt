@@ -16,10 +16,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.net.URL
 
-class OidcTest(val url: String, val engine: HttpClientEngine = CIO.create()) {
+class OidcTest(val url: String) {
     suspend fun fetchConfig(): String {
         val httpProxy = System.getenv("HTTP_PROXY")
-        val httpClient = HttpClient(engine) {
+        val httpClient = HttpClient(CIO) {
             engine {
                 val httpProxy = System.getenv("HTTP_PROXY")
                 log.info("OidcWellKnownUrl will use proxy: $httpProxy")
