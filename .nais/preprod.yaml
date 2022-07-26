@@ -57,6 +57,7 @@ spec:
     paths:
       - kvPath: /apikey/appdynamics/dev
         mountPath: /var/run/secrets/nais.io/vault
+  webproxy: true
   env:
     - name: ISSO_JWKS_URL
       value: "https://isso-q.adeo.no/isso/oauth2/connect/jwk_uri"
