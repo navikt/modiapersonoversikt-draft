@@ -1,20 +1,26 @@
 package no.nav.modiapersonoversikt.draft
 
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.Parameters
-import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
-import io.ktor.server.auth.authenticate
-import io.ktor.server.auth.principal
-import io.ktor.server.request.receive
-import io.ktor.server.response.respond
+import io.ktor.http.*
+import io.ktor.serialization.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.util.filter
-import io.ktor.util.pipeline.PipelineContext
-import io.ktor.util.toMap
+import io.ktor.server.websocket.*
+import io.ktor.util.*
+import io.ktor.util.pipeline.*
+import io.ktor.util.reflect.*
+import io.ktor.websocket.*
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
+import no.nav.modiapersonoversikt.infrastructure.UUIDPrincipal
+import no.nav.modiapersonoversikt.log
 import no.nav.personoversikt.ktor.utils.Security.SubjectPrincipal
+import java.util.*
 
-fun Route.draftRoutes(authProviders: Array<String?>, dao: DraftDAO) {
+fun Route.draftRoutes(authProviders: Array<String?>, dao: DraftDAO, uuidDAO: UuidDAO) {
+    val wsHandler = WsHandler(dao)
+
     authenticate(*authProviders) {
         route("/draft") {
             get {
@@ -43,6 +49,50 @@ fun Route.draftRoutes(authProviders: Array<String?>, dao: DraftDAO) {
             }
         }
     }
+
+    authenticate(*authProviders) {
+        get("/generate-uid") {
+            withSubject { subject ->
+                call.respond(uuidDAO.generateUid(subject).uuid.toString())
+            }
+        }
+    }
+    authenticate("ws") {
+        webSocket("/draft/ws") {
+            val uuid = checkNotNull(this.call.principal<UUIDPrincipal>()).uuid
+            val ownerUuid: UuidDAO.OwnerUUID? = uuidDAO.getOwner(uuid)
+            if (ownerUuid == null) {
+                close(CloseReason(code = 4010, message = "Unauthorized"))
+            } else if (ownerUuid.shouldBeRefreshed) {
+                close(CloseReason(code = 4060, message = "Refresh credentials"))
+            } else {
+                try {
+                    while (true) {
+                        wsHandler.process(ownerUuid.owner, receiveDeserialized())
+                    }
+                } catch (e: ClosedReceiveChannelException) {
+                    // This is expected when client disconnectes
+                } catch (e: Throwable) {
+                    log.error("Error in WS", e)
+                }
+            }
+        }
+    }
+}
+
+suspend inline fun <reified T> WebSocketServerSession.deserialize(frame: Frame.Text): T {
+    val conv = checkNotNull(converter) { "No converter found" }
+    val result = conv.deserialize(
+        charset = call.request.headers.suitableCharset(),
+        typeInfo = typeInfo<T>(),
+        content = frame
+    )
+    if (result is T) return result
+
+    throw WebsocketDeserializeException(
+        "Can't deserialize value : expected value of type ${T::class.simpleName}, got ${result::class.simpleName}",
+        frame = frame
+    )
 }
 
 private fun Parameters.parse(): Pair<Boolean, DraftContext> {

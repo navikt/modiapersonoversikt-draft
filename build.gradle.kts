@@ -6,7 +6,7 @@ val ktorVersion = "2.0.3"
 val prometheusVersion = "1.9.0"
 val logbackVersion = "1.2.11"
 val logstashVersion = "7.2"
-val modiaCommonVersion = "1.2022.07.15-09.01-9ead52c51549"
+val modiaCommonVersion = "1.2022.07.26-13.42-b5f759e4f887"
 
 plugins {
     kotlin("jvm") version "1.7.10"
@@ -51,6 +51,7 @@ dependencies {
     implementation("io.ktor:ktor-server-cors:$ktorVersion")
     implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
     implementation("io.ktor:ktor-server-forwarded-header:$ktorVersion")
+    implementation("io.ktor:ktor-server-websockets:$ktorVersion")
 
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")

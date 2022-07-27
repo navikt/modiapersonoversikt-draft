@@ -1,8 +1,9 @@
 package no.nav.modiapersonoversikt.config
 
+import io.ktor.http.*
 import no.nav.modiapersonoversikt.AzureAd
 import no.nav.modiapersonoversikt.OpenAM
-import no.nav.personoversikt.ktor.utils.Security.AuthCookie
+import no.nav.personoversikt.ktor.utils.Security
 import no.nav.personoversikt.ktor.utils.Security.AuthProviderConfig
 import no.nav.personoversikt.utils.EnvUtils.getConfig
 import no.nav.personoversikt.utils.EnvUtils.getRequiredConfig
@@ -24,16 +25,22 @@ class Configuration(
     val clusterName: String = getRequiredConfig("NAIS_CLUSTER_NAME", defaultValues),
     val openam: AuthProviderConfig = AuthProviderConfig(
         name = OpenAM,
-        jwksUrl = getRequiredConfig("ISSO_JWKS_URL", defaultValues),
-        cookies = listOf(
-            AuthCookie(name = "modia_ID_token"),
-            AuthCookie(name = "ID_token"),
+        jwksConfig = Security.JwksConfig.JwksUrl(
+            getRequiredConfig("ISSO_JWKS_URL", defaultValues),
+            getRequiredConfig("ISSO_ISSUER", defaultValues)
+        ),
+        tokenLocations = listOf(
+            Security.TokenLocation.Cookie(name = "modia_ID_token"),
+            Security.TokenLocation.Cookie(name = "ID_token"),
         )
     ),
-    val azuread: AuthProviderConfig? = getConfig("AZURE_OPENID_CONFIG_JWKS_URI")?.let {
+    val azuread: AuthProviderConfig? = getConfig("AZURE_APP_WELL_KNOWN_URL")?.let { jwksurl ->
         AuthProviderConfig(
             name = AzureAd,
-            jwksUrl = it
+            jwksConfig = Security.JwksConfig.OidcWellKnownUrl(jwksurl),
+            tokenLocations = listOf(
+                Security.TokenLocation.Header(HttpHeaders.Authorization)
+            )
         )
     },
     val database: DatabaseConfig = DatabaseConfig()
