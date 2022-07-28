@@ -17,7 +17,6 @@ import no.nav.modiapersonoversikt.config.Configuration
 import no.nav.modiapersonoversikt.draft.DraftDAOImpl
 import no.nav.modiapersonoversikt.draft.UuidDAOImpl
 import no.nav.modiapersonoversikt.draft.draftRoutes
-import no.nav.modiapersonoversikt.infrastructure.UUIDPrincipal
 import no.nav.modiapersonoversikt.infrastructure.exceptionHandler
 import no.nav.modiapersonoversikt.infrastructure.notFoundHandler
 import no.nav.modiapersonoversikt.utils.JacksonUtils.objectMapper
@@ -25,7 +24,6 @@ import no.nav.personoversikt.ktor.utils.Metrics
 import no.nav.personoversikt.ktor.utils.Security
 import no.nav.personoversikt.ktor.utils.Selftest
 import org.slf4j.event.Level
-import java.util.*
 import javax.sql.DataSource
 import kotlin.concurrent.fixedRateTimer
 import kotlin.time.Duration.Companion.minutes
@@ -71,11 +69,6 @@ fun Application.draftApp(
             security.setupMock(this, "Z999999")
         } else {
             security.setupJWT(this)
-        }
-        basic("ws") {
-            validate {
-                UUIDPrincipal(UUID.fromString(it.name))
-            }
         }
     }
 
