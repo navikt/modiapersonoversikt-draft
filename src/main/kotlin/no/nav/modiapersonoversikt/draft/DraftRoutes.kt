@@ -57,10 +57,9 @@ fun Route.draftRoutes(authProviders: Array<String?>, dao: DraftDAO, uuidDAO: Uui
         }
     }
 
-    webSocket("/draft/ws") {
-        val credentials: UserPasswordCredential? = call.request.basicAuthenticationCredentials()
-        val ownerUuid: UuidDAO.OwnerUUID? = credentials
-            ?.name
+    webSocket("/draft/ws/{uuid}") {
+        val uuid = call.parameters["uuid"]
+        val ownerUuid: UuidDAO.OwnerUUID? = uuid
             ?.let {
                 runCatching { UUID.fromString(it) }
                     .onFailure { log.error("Received credentials but was invalid uuid: $it") }
