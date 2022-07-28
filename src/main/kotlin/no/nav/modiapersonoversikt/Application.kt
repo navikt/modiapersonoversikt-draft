@@ -24,6 +24,7 @@ import no.nav.personoversikt.ktor.utils.Metrics
 import no.nav.personoversikt.ktor.utils.Security
 import no.nav.personoversikt.ktor.utils.Selftest
 import org.slf4j.event.Level
+import java.util.*
 import javax.sql.DataSource
 import kotlin.concurrent.fixedRateTimer
 import kotlin.time.Duration.Companion.minutes
@@ -70,6 +71,11 @@ fun Application.draftApp(
         } else {
             security.setupJWT(this)
         }
+        basic("ws") {
+            validate {
+                UUIDPrincipal(it.name)
+            }
+        }
     }
 
     install(ContentNegotiation) {
@@ -83,7 +89,11 @@ fun Application.draftApp(
     install(CallLogging) {
         level = Level.INFO
         disableDefaultColors()
-        filter { call -> call.request.path().startsWith("/modiapersonoversikt-draft/api") }
+        filter { call ->
+            val apiCall = call.request.path().startsWith("/modiapersonoversikt-draft/api")
+            val wsAuthChallenge = call.request.path().endsWith("/ws") && call.response.status() == HttpStatusCode.Unauthorized
+            apiCall && !wsAuthChallenge
+        }
         mdc("userId") { call -> security.getSubject(call).joinToString(";") }
     }
 
@@ -106,3 +116,5 @@ fun Application.draftApp(
         }
     }
 }
+
+data class UUIDPrincipal(val uuid: String) : Principal

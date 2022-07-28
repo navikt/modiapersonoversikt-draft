@@ -13,6 +13,7 @@ import io.ktor.util.pipeline.*
 import io.ktor.util.reflect.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
+import no.nav.modiapersonoversikt.UUIDPrincipal
 import no.nav.modiapersonoversikt.log
 import no.nav.personoversikt.ktor.utils.Security.SubjectPrincipal
 import java.util.*
@@ -56,35 +57,45 @@ fun Route.draftRoutes(authProviders: Array<String?>, dao: DraftDAO, uuidDAO: Uui
             }
         }
     }
+    authenticate("ws") {
+        webSocket("/draft/ws") {
+            draftws(uuidDAO, wsHandler, this.call.principal<UUIDPrincipal>()?.uuid)
+        }
+    }
 
     webSocket("/draft/ws/{uuid}") {
-        val uuid = call.parameters["uuid"]
-        val ownerUuid: UuidDAO.OwnerUUID? = uuid
-            ?.let {
-                runCatching { UUID.fromString(it) }
-                    .onFailure { log.error("Received credentials but was invalid uuid: $it") }
-                    .getOrNull()
+        draftws(uuidDAO, wsHandler, call.parameters["uuid"])
+    }
+
+}
+
+suspend fun WebSocketServerSession.draftws(uuidDAO: UuidDAO, wsHandler: WsHandler, uuid: String?) {
+    val ownerUuid: UuidDAO.OwnerUUID? = uuid
+        ?.let {
+            runCatching { UUID.fromString(it) }
+                .onFailure { log.error("Received credentials but was invalid uuid: $it") }
+                .getOrNull()
+        }
+        ?.let { uuidDAO.getOwner(it) }
+    if (ownerUuid == null) {
+        log.warn("Received credentials but could not find owner in db")
+        close(CloseReason(code = 4010, message = "Unauthorized"))
+    } else if (ownerUuid.shouldBeRefreshed) {
+        log.warn("Received credentials but needs refreshing")
+        close(CloseReason(code = 4060, message = "Refresh credentials"))
+    } else {
+        try {
+            while (true) {
+                wsHandler.process(ownerUuid.owner, receiveDeserialized())
             }
-            ?.let { uuidDAO.getOwner(it) }
-        if (ownerUuid == null) {
-            log.warn("Received credentials but could not find owner in db")
-            close(CloseReason(code = 4010, message = "Unauthorized"))
-        } else if (ownerUuid.shouldBeRefreshed) {
-            log.warn("Received credentials but needs refreshing")
-            close(CloseReason(code = 4060, message = "Refresh credentials"))
-        } else {
-            try {
-                while (true) {
-                    wsHandler.process(ownerUuid.owner, receiveDeserialized())
-                }
-            } catch (e: ClosedReceiveChannelException) {
-                // This is expected when client disconnectes
-            } catch (e: Throwable) {
-                log.error("Error in WS", e)
-            }
+        } catch (e: ClosedReceiveChannelException) {
+            // This is expected when client disconnectes
+        } catch (e: Throwable) {
+            log.error("Error in WS", e)
         }
     }
 }
+
 
 suspend inline fun <reified T> WebSocketServerSession.deserialize(frame: Frame.Text): T {
     val conv = checkNotNull(converter) { "No converter found" }
