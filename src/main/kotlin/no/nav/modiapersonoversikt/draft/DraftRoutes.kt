@@ -73,7 +73,7 @@ suspend fun WebSocketServerSession.draftws(uuidDAO: UuidDAO, wsHandler: WsHandle
     val ownerUuid: UuidDAO.OwnerUUID? = uuid
         ?.let {
             runCatching { UUID.fromString(it) }
-                .onFailure { log.error("Received credentials but was invalid uuid: $it") }
+                .onFailure { log.error("Received credentials but was invalid uuid: $it (${uuid})") }
                 .getOrNull()
         }
         ?.let { uuidDAO.getOwner(it) }
