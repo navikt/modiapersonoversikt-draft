@@ -13,13 +13,22 @@ import io.ktor.util.pipeline.*
 import io.ktor.util.reflect.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
+import kotlinx.coroutines.runBlocking
 import no.nav.modiapersonoversikt.UUIDPrincipal
 import no.nav.modiapersonoversikt.log
+import no.nav.modiapersonoversikt.utils.SessionList
 import no.nav.personoversikt.ktor.utils.Security.SubjectPrincipal
 import java.util.*
 
 fun Route.draftRoutes(authProviders: Array<String?>, dao: DraftDAO, uuidDAO: UuidDAO) {
     val wsHandler = WsHandler(dao)
+    val sessions = SessionList()
+    environment?.monitor?.subscribe(ApplicationStopPreparing) {
+        runBlocking {
+            sessions.closeAll(reason = CloseReason(CloseReason.Codes.GOING_AWAY, "GOING_AWAY"))
+        }
+    }
+
 
     authenticate(*authProviders) {
         route("/draft") {
@@ -59,12 +68,16 @@ fun Route.draftRoutes(authProviders: Array<String?>, dao: DraftDAO, uuidDAO: Uui
     }
     authenticate("ws") {
         webSocket("/draft/ws") {
-            draftws(uuidDAO, wsHandler, this.call.principal<UUIDPrincipal>()?.uuid)
+            sessions.track(this) {
+                draftws(uuidDAO, wsHandler, this.call.principal<UUIDPrincipal>()?.uuid)
+            }
         }
     }
 
     webSocket("/draft/ws/{uuid}") {
-        draftws(uuidDAO, wsHandler, call.parameters["uuid"])
+        sessions.track(this) {
+            draftws(uuidDAO, wsHandler, call.parameters["uuid"])
+        }
     }
 
 }
