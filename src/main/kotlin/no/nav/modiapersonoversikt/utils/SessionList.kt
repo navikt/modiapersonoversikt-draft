@@ -3,10 +3,14 @@ package no.nav.modiapersonoversikt.utils
 import io.ktor.websocket.*
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import no.nav.personoversikt.ktor.utils.Metrics
 
 class SessionList {
     private val lock = Semaphore(permits = 1)
     private val list = mutableListOf<WebSocketSession>()
+    init {
+        Metrics.Registry.gaugeCollectionSize("ws-sessions", emptyList(), list)
+    }
 
     suspend fun <T> track(session: WebSocketSession, block: suspend () -> T): T {
         lock.withPermit { list.add(session) }
