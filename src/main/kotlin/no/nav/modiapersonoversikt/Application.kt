@@ -24,7 +24,7 @@ import no.nav.personoversikt.ktor.utils.Metrics
 import no.nav.personoversikt.ktor.utils.Security
 import no.nav.personoversikt.ktor.utils.Selftest
 import org.slf4j.event.Level
-import java.util.*
+import java.time.Duration
 import javax.sql.DataSource
 import kotlin.concurrent.fixedRateTimer
 import kotlin.time.Duration.Companion.minutes
@@ -83,6 +83,7 @@ fun Application.draftApp(
     }
 
     install(WebSockets) {
+        pingPeriod = Duration.ofMinutes(3)
         contentConverter = JacksonWebsocketContentConverter(objectMapper)
     }
 
