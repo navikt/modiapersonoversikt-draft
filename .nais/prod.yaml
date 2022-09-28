@@ -27,7 +27,7 @@ spec:
     path: /modiapersonoversikt-draft/internal/metrics
   resources:
     requests:
-      cpu: 150m
+      cpu: 250m
       memory: 256Mi
     limits:
       cpu: 2000m
@@ -37,7 +37,7 @@ spec:
   replicas:
     min: 2
     max: 4
-    cpuThresholdPercentage: 75
+    cpuThresholdPercentage: 85
   azure:
     application:
       enabled: true
