@@ -36,8 +36,7 @@ fun Application.draftApp(
 ) {
     val security = Security(
         listOfNotNull(
-            configuration.openam,
-            configuration.azuread,
+            configuration.azuread
         )
     )
     val draftDAO = DraftDAOImpl(dataSource)
