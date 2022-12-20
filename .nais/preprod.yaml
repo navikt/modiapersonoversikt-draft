@@ -28,10 +28,10 @@ spec:
   resources:
     requests:
       cpu: 150m
-      memory: 256Mi
+      memory: 512Mi
     limits:
       cpu: 2000m
-      memory: 512Mi
+      memory: 1024Mi
   ingresses:
     - https://app-q0.adeo.no/modiapersonoversikt-draft
     - https://app-q1.adeo.no/modiapersonoversikt-draft
