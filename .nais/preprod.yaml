@@ -64,5 +64,7 @@ spec:
   env:
     - name: DATABASE_JDBC_URL
       value: "jdbc:postgresql://b27dbvl030.preprod.local:5432/modiapersonoversikt-draft-pg15"
+    - name: DATABASE_NAME
+      value: "modiapersonoversikt-draft-pg15"
     - name: VAULT_MOUNTPATH
       value: "postgresql/preprod-fss"

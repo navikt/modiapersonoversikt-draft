@@ -60,5 +60,7 @@ spec:
   env:
     - name: DATABASE_JDBC_URL
       value: "jdbc:postgresql://A01DBVL009.adeo.no:5432/modiapersonoversikt-draft"
+    - name: DATABASE_NAME
+      value: "modiapersonoversikt-draft"
     - name: VAULT_MOUNTPATH
       value: "postgresql/prod-fss"
