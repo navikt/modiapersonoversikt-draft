@@ -40,7 +40,7 @@ class DataSourceConfiguration(val env: Configuration) {
     }
 
     companion object {
-        private fun dbRole(user: String): String = "modiapersonoversikt-draft-$user"
+        private fun dbRole(user: String): String = "modiapersonoversikt-draft-pg15-$user"
 
         fun migrateDb(configuration: Configuration, dataSource: DataSource) {
             Flyway
