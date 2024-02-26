@@ -11,7 +11,6 @@ metadata:
 spec:
   image: {{image}}
   port: 7070
-  team: personoversikt
   liveness:
     path: /modiapersonoversikt-draft/internal/isAlive
     initialDelay: 20
@@ -60,6 +59,8 @@ spec:
   webproxy: true
   env:
     - name: DATABASE_JDBC_URL
-      value: "jdbc:postgresql://A01DBVL009.adeo.no:5432/modiapersonoversikt-draft"
+      value: "jdbc:postgresql://A01DBVL033.adeo.no:5432/modiapersonoversikt-draft-pg15"
+    - name: DATABASE_NAME
+      value: "modiapersonoversikt-draft-pg15"
     - name: VAULT_MOUNTPATH
       value: "postgresql/prod-fss"

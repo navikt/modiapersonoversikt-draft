@@ -7,7 +7,7 @@ import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil
 import org.flywaydb.core.Flyway
 import javax.sql.DataSource
 
-class DataSourceConfiguration(val env: Configuration) {
+class DataSourceConfiguration(private val env: Configuration) {
     private var userDataSource = createDatasource("user")
     private var adminDataSource = createDatasource("admin")
 
@@ -35,12 +35,12 @@ class DataSourceConfiguration(val env: Configuration) {
         return HikariCPVaultUtil.createHikariDataSourceWithVaultIntegration(
             config,
             mountPath,
-            dbRole(user)
+            dbRole(env.database.dbName, user),
         )
     }
 
     companion object {
-        private fun dbRole(user: String): String = "modiapersonoversikt-draft-$user"
+        private fun dbRole(dbName: String, user: String): String = "$dbName-$user"
 
         fun migrateDb(configuration: Configuration, dataSource: DataSource) {
             Flyway
@@ -48,7 +48,7 @@ class DataSourceConfiguration(val env: Configuration) {
                 .dataSource(dataSource)
                 .also {
                     if (dataSource is HikariDataSource && configuration.clusterName != "local") {
-                        val dbUser = dbRole("admin")
+                        val dbUser = dbRole(configuration.database.dbName, "admin")
                         it.initSql("SET ROLE '$dbUser'")
                     }
                 }
