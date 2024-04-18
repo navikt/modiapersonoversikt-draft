@@ -40,8 +40,6 @@ spec:
   gcp:
     sqlInstances:
       - type: POSTGRES_15
-        tier: db-custom-2-16384
-        diskSize: 160
         databases:
           - name: modiapersonoversikt-draft-db
   azure:
