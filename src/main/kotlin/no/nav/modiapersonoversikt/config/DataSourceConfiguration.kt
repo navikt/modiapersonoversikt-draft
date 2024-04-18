@@ -15,16 +15,29 @@ class DataSourceConfiguration(private val env: Configuration) {
     fun adminDataSource() = adminDataSource
 
     private fun createDatasource(user: String): DataSource {
-        val mountPath = env.database.vaultMountpath
         val config = HikariConfig()
-        config.jdbcUrl = env.database.jdbcUrl
+        if (env.clusterName == "dev-gcp" || env.clusterName == "prod-gcp") {
+            val database: DatabaseConfigGcp = env.database as DatabaseConfigGcp
+            config.jdbcUrl = database.jdbcUrl
+            config.minimumIdle = 2
+            config.maximumPoolSize = 10
+            config.connectionTimeout = 1000
+            config.maxLifetime = 30_000
+            config.username = database.userName
+            config.password = database.password
+            return HikariDataSource(config)
+        }
+
+        val database: DatabaseConfig = env.database as DatabaseConfig
+        val mountPath = database.vaultMountpath
+        config.jdbcUrl = database.jdbcUrl
         config.minimumIdle = 0
         config.maximumPoolSize = 4
         config.connectionTimeout = 5000
         config.maxLifetime = 30000
         config.isAutoCommit = false
 
-        log.info("Creating DataSource to: ${env.database.jdbcUrl}")
+        log.info("Creating DataSource to: ${database.jdbcUrl}")
 
         if (env.clusterName == "local") {
             config.username = "test"
@@ -39,21 +52,15 @@ class DataSourceConfiguration(private val env: Configuration) {
         )
     }
 
-    companion object {
-        private fun dbRole(dbName: String, user: String): String = "$dbName-$user"
-
-        fun migrateDb(configuration: Configuration, dataSource: DataSource) {
-            Flyway
-                .configure()
-                .dataSource(dataSource)
-                .also {
-                    if (dataSource is HikariDataSource && configuration.clusterName != "local") {
-                        val dbUser = dbRole(configuration.database.dbName, "admin")
-                        it.initSql("SET ROLE '$dbUser'")
-                    }
-                }
-                .load()
-                .migrate()
-        }
+    fun runFlyway() {
+        Flyway
+            .configure()
+            .dataSource(adminDataSource)
+            .load()
+            .migrate()
     }
+
+    private fun dbRole(dbName: String, user: String): String = "$dbName-$user"
 }
+
+

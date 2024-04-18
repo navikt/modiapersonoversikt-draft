@@ -20,15 +20,37 @@ data class DatabaseConfig(
     val dbName: String = getRequiredConfig("DATABASE_NAME", defaultValues)
 )
 
-class Configuration(
-    val clusterName: String = getRequiredConfig("NAIS_CLUSTER_NAME", defaultValues),
+class DatabaseConfigGcp {
+    private val appDB: String = getRequiredConfig("DATABASE_NAME")
+    private val appDbString = "NAIS_DATABASE_MODIAPERSONOVERSIKT_DRAFT_MODIAPERSONOVERSIKT_DRAFT_DB"
+    private val host = getRequiredConfig("${appDbString}_HOST")
+    private val port = getRequiredConfig("${appDbString}_PORT").toInt()
+    val jdbcUrl = "jdbc:postgresql://$host:$port/$appDB"
+    val userName = getRequiredConfig("${appDbString}_USERNAME")
+    val password = getRequiredConfig("${appDbString}_PASSWORD")
+}
+
+class Configuration {
+    val clusterName: String = getRequiredConfig("NAIS_CLUSTER_NAME", defaultValues)
     val azuread: AuthProviderConfig =
         AuthProviderConfig(
             name = AzureAd,
-            jwksConfig = Security.JwksConfig.OidcWellKnownUrl(getRequiredConfig("AZURE_APP_WELL_KNOWN_URL", defaultValues)),
+            jwksConfig = Security.JwksConfig.OidcWellKnownUrl(
+                getRequiredConfig(
+                    "AZURE_APP_WELL_KNOWN_URL",
+                    defaultValues
+                )
+            ),
             tokenLocations = listOf(
                 Security.TokenLocation.Header(HttpHeaders.Authorization)
             )
-        ),
-    val database: DatabaseConfig = DatabaseConfig()
-)
+        )
+    val database = database()
+
+    private fun database(): Any {
+        if(clusterName == "dev-gcp" || clusterName == "prod-gcp"){
+            return DatabaseConfigGcp()
+        }
+        return DatabaseConfig()
+    }
+}

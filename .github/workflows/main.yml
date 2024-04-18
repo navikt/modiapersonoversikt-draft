@@ -85,3 +85,21 @@ jobs:
           CLUSTER: prod-fss
           RESOURCE: .nais/prod.yaml
           VAR: image=${{ needs.build-and-push.outputs.image }}
+
+  deploy-dev-gcp:
+    name: Deploy to preprod
+    needs: build-and-push
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          PRINT_PAYLOAD: true
+          CLUSTER: dev-gcp
+          RESOURCE: .nais/dev.yaml
+          VAR: image=${{ needs.build-and-push.outputs.image }}
