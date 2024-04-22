@@ -15,20 +15,10 @@ private val defaultValues = mapOf(
 )
 
 data class DatabaseConfig(
-    val jdbcUrl: String = getRequiredConfig("DATABASE_JDBC_URL", defaultValues),
-    val vaultMountpath: String = getRequiredConfig("VAULT_MOUNTPATH", defaultValues),
-    val dbName: String = getRequiredConfig("DATABASE_NAME", defaultValues)
+    val dbName: String,
+    val jdbcUrl: String,
+    val vaultMountpath: String? = null,
 )
-
-class DatabaseConfigGcp {
-    private val appDB: String = getRequiredConfig("DATABASE_NAME")
-    private val appDbString = "NAIS_DATABASE_MODIAPERSONOVERSIKT_DRAFT_MODIAPERSONOVERSIKT_DRAFT_DB"
-    private val host = getRequiredConfig("${appDbString}_HOST")
-    private val port = getRequiredConfig("${appDbString}_PORT").toInt()
-    val jdbcUrl = "jdbc:postgresql://$host:$port/$appDB"
-    val userName = getRequiredConfig("${appDbString}_USERNAME")
-    val password = getRequiredConfig("${appDbString}_PASSWORD")
-}
 
 class Configuration {
     val clusterName: String = getRequiredConfig("NAIS_CLUSTER_NAME", defaultValues)
@@ -47,10 +37,18 @@ class Configuration {
         )
     val database = database()
 
-    private fun database(): Any {
-        if(clusterName == "dev-gcp" || clusterName == "prod-gcp"){
-            return DatabaseConfigGcp()
+    private fun database(): DatabaseConfig {
+        if (clusterName == "dev-gcp" || clusterName == "prod-gcp") {
+            return DatabaseConfig(
+                dbName = getRequiredConfig("DATABASE_NAME", defaultValues),
+                jdbcUrl = getRequiredConfig("NAIS_DATABASE_MODIAPERSONOVERSIKT_DRAFT_MODIAPERSONOVERSIKT_DRAFT_DB_JDBC_URL", defaultValues),
+            )
+
         }
-        return DatabaseConfig()
+        return DatabaseConfig(
+            dbName = getRequiredConfig("DATABASE_NAME", defaultValues),
+            jdbcUrl = getRequiredConfig("DATABASE_JDBC_URL", defaultValues),
+            vaultMountpath = getRequiredConfig("VAULT_MOUNTPATH", defaultValues),
+        )
     }
 }

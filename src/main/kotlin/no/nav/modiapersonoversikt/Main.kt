@@ -11,7 +11,8 @@ val log = LoggerFactory.getLogger("modiapersonoversikt-draft.Application")
 fun main() {
     val configuration = Configuration()
     val dbConfig = DataSourceConfiguration(configuration)
-    dbConfig.runFlyway()
+
+    DataSourceConfiguration.migrateDb(configuration, dbConfig.adminDataSource())
 
     KtorServer.create(Netty, 7070) {
         draftApp(
