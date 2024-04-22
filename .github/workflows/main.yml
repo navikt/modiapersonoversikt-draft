@@ -87,7 +87,7 @@ jobs:
           VAR: image=${{ needs.build-and-push.outputs.image }}
 
   deploy-dev-gcp:
-    name: Deploy to preprod
+    name: Deploy to dev gcp
     needs: build-and-push
     if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
