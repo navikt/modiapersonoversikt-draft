@@ -18,6 +18,12 @@ class DataSourceConfiguration(private val env: Configuration) {
         Flyway
             .configure()
             .dataSource(adminDataSource)
+            .also {
+                if (adminDataSource is HikariDataSource && (env.clusterName == "dev-fss" || env.clusterName == "prod-fss")) {
+                    val dbUser = dbRole(env.database.dbName, "admin")
+                    it.initSql("SET ROLE '$dbUser'")
+                }
+            }
             .load()
             .migrate()
     }
