@@ -1,0 +1,68 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: modiapersonoversikt-draft
+  namespace: personoversikt
+  labels:
+    team: personoversikt
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  image: {{image}}
+  port: 7070
+  liveness:
+    path: /modiapersonoversikt-draft/internal/isAlive
+    initialDelay: 20
+    timeout: 1
+    periodSeconds: 5
+    failureThreshold: 10
+  readiness:
+    path: /modiapersonoversikt-draft/internal/isReady
+    initialDelay: 20
+    timeout: 1
+  prometheus:
+    enabled: true
+    path: /modiapersonoversikt-draft/internal/metrics
+  resources:
+    requests:
+      cpu: 150m
+      memory: 512Mi
+    limits:
+      cpu: 2000m
+      memory: 1024Mi
+  ingresses:
+    - https://modiapersonoversikt-draft.intern.dev.nav.no
+  replicas:
+    min: 1
+    max: 1
+    cpuThresholdPercentage: 90
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_15
+        databases:
+          - name: modiapersonoversikt-draft-db
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
+      allowAllUsers: true
+      claims:
+        extra:
+          - "NAVident"
+  accessPolicy:
+    inbound:
+      rules:
+        - application: modiapersonoversikt
+          namespace: personoversikt
+          cluster: dev-gcp
+        - application: modiapersonoversikt-q0
+          namespace: personoversikt
+          cluster: dev-fss
+        - application: modiapersonoversikt-q1
+          namespace: personoversikt
+          cluster: dev-fss
+  webproxy: true
+  env:
+    - name: DATABASE_NAME
+      value: "modiapersonoversikt-draft-db"

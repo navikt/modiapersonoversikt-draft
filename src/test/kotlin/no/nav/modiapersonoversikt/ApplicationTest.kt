@@ -3,7 +3,6 @@ package no.nav.modiapersonoversikt
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.testing.*
 import no.nav.modiapersonoversikt.draft.DraftContext
 import no.nav.modiapersonoversikt.draft.DraftDTO

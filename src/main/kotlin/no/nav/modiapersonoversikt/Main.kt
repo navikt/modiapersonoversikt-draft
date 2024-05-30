@@ -12,7 +12,7 @@ fun main() {
     val configuration = Configuration()
     val dbConfig = DataSourceConfiguration(configuration)
 
-    DataSourceConfiguration.migrateDb(configuration, dbConfig.adminDataSource())
+    dbConfig.runFlyway()
 
     KtorServer.create(Netty, 7070) {
         draftApp(

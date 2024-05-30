@@ -3,9 +3,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 val mainClass = "no.nav.modiapersonoversikt.MainKt"
 val kotlinVersion = "1.7.10"
 val ktorVersion = "2.0.3"
-val prometheusVersion = "1.9.0"
-val logbackVersion = "1.2.11"
-val logstashVersion = "7.2"
+val prometheusVersion = "1.12.5"
+val logbackVersion = "1.5.6"
+val logstashVersion = "7.4"
 val modiaCommonVersion = "1.2022.07.26-13.42-b5f759e4f887"
 
 plugins {
@@ -55,7 +55,7 @@ dependencies {
 
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.3")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.0")
 
     implementation("io.ktor:ktor-server-metrics-micrometer:$ktorVersion")
     implementation("io.micrometer:micrometer-registry-prometheus:$prometheusVersion")
@@ -66,14 +66,14 @@ dependencies {
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashVersion")
-    implementation("no.nav:vault-jdbc:1.3.9")
+    implementation("no.nav:vault-jdbc:1.3.10")
     implementation("org.flywaydb:flyway-core:8.5.12")
     implementation("com.github.seratch:kotliquery:1.8.0")
 
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")
     testRuntimeOnly("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     testImplementation("org.testcontainers:postgresql:1.17.2")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
 }
 
 java {

@@ -15,9 +15,9 @@ private val defaultValues = mapOf(
 )
 
 data class DatabaseConfig(
-    val jdbcUrl: String = getRequiredConfig("DATABASE_JDBC_URL", defaultValues),
-    val vaultMountpath: String = getRequiredConfig("VAULT_MOUNTPATH", defaultValues),
-    val dbName: String = getRequiredConfig("DATABASE_NAME", defaultValues)
+    val dbName: String = getRequiredConfig("DATABASE_NAME", defaultValues),
+    val jdbcUrl: String,
+    val vaultMountpath: String? = null,
 )
 
 class Configuration(
@@ -25,10 +25,28 @@ class Configuration(
     val azuread: AuthProviderConfig =
         AuthProviderConfig(
             name = AzureAd,
-            jwksConfig = Security.JwksConfig.OidcWellKnownUrl(getRequiredConfig("AZURE_APP_WELL_KNOWN_URL", defaultValues)),
+            jwksConfig = Security.JwksConfig.OidcWellKnownUrl(
+                getRequiredConfig(
+                    "AZURE_APP_WELL_KNOWN_URL",
+                    defaultValues
+                )
+            ),
             tokenLocations = listOf(
                 Security.TokenLocation.Header(HttpHeaders.Authorization)
             )
         ),
-    val database: DatabaseConfig = DatabaseConfig()
+    val database: DatabaseConfig = if (clusterName == "dev-gcp" || clusterName == "prod-gcp") {
+        DatabaseConfig(
+            jdbcUrl = getRequiredConfig(
+                "NAIS_DATABASE_MODIAPERSONOVERSIKT_DRAFT_MODIAPERSONOVERSIKT_DRAFT_DB_JDBC_URL",
+                defaultValues
+            ),
+        )
+
+    } else {
+        DatabaseConfig(
+            jdbcUrl = getRequiredConfig("DATABASE_JDBC_URL", defaultValues),
+            vaultMountpath = getRequiredConfig("VAULT_MOUNTPATH", defaultValues),
+        )
+    }
 )

@@ -14,6 +14,20 @@ class DataSourceConfiguration(private val env: Configuration) {
     fun userDataSource() = userDataSource
     fun adminDataSource() = adminDataSource
 
+    fun runFlyway() {
+        Flyway
+            .configure()
+            .dataSource(adminDataSource)
+            .also {
+                if (adminDataSource is HikariDataSource && (env.clusterName == "dev-fss" || env.clusterName == "prod-fss")) {
+                    val dbUser = dbRole(env.database.dbName, "admin")
+                    it.initSql("SET ROLE '$dbUser'")
+                }
+            }
+            .load()
+            .migrate()
+    }
+
     private fun createDatasource(user: String): DataSource {
         val mountPath = env.database.vaultMountpath
         val config = HikariConfig()
@@ -32,6 +46,10 @@ class DataSourceConfiguration(private val env: Configuration) {
             return HikariDataSource(config)
         }
 
+        if (env.clusterName == "dev-gcp" || env.clusterName == "prod-gcp") {
+            return HikariDataSource(config)
+        }
+
         return HikariCPVaultUtil.createHikariDataSourceWithVaultIntegration(
             config,
             mountPath,
@@ -39,21 +57,5 @@ class DataSourceConfiguration(private val env: Configuration) {
         )
     }
 
-    companion object {
-        private fun dbRole(dbName: String, user: String): String = "$dbName-$user"
-
-        fun migrateDb(configuration: Configuration, dataSource: DataSource) {
-            Flyway
-                .configure()
-                .dataSource(dataSource)
-                .also {
-                    if (dataSource is HikariDataSource && configuration.clusterName != "local") {
-                        val dbUser = dbRole(configuration.database.dbName, "admin")
-                        it.initSql("SET ROLE '$dbUser'")
-                    }
-                }
-                .load()
-                .migrate()
-        }
-    }
+    private fun dbRole(dbName: String, user: String): String = "$dbName-$user"
 }

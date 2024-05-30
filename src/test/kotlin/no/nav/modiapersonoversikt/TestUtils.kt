@@ -30,7 +30,7 @@ interface WithDatabase {
         @BeforeAll
         @JvmStatic
         fun setupDatabase() {
-            DataSourceConfiguration.migrateDb(configuration, dbConfig.adminDataSource())
+            dbConfig.runFlyway()
         }
     }
 
