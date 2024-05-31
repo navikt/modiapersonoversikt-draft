@@ -9,7 +9,7 @@ val logstashVersion = "7.4"
 val modiaCommonVersion = "1.2022.07.26-13.42-b5f759e4f887"
 
 plugins {
-    kotlin("jvm") version "1.7.10"
+    kotlin("jvm") version "2.0.0"
     idea
 }
 
