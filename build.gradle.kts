@@ -7,6 +7,7 @@ val prometheusVersion = "1.13.0"
 val logbackVersion = "1.5.6"
 val logstashVersion = "7.4"
 val modiaCommonVersion = "1.2024.05.31-12.22-e61d6fb8f19f"
+val flywayVersion = "10.14.0"
 
 plugins {
     kotlin("jvm") version "2.0.0"
@@ -67,7 +68,8 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashVersion")
     implementation("no.nav:vault-jdbc:1.3.10")
-    implementation("org.flywaydb:flyway-core:8.5.12")
+    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
     implementation("com.github.seratch:kotliquery:1.9.0")
 
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")
@@ -77,11 +79,11 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "11"
+    kotlinOptions.jvmTarget = "17"
 }
 
 tasks.test {
