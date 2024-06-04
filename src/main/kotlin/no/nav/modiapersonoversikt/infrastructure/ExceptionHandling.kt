@@ -58,9 +58,9 @@ internal data class HttpErrorResponse(
 )
 
 internal fun ApplicationRequest.url(): String {
-    val port = when (origin.port) {
+    val port = when (origin.serverPort) {
         in listOf(80, 443) -> ""
-        else -> ":${origin.port}"
+        else -> ":${origin.serverPort}"
     }
-    return "${origin.scheme}://${origin.host}$port${origin.uri}"
+    return "${origin.scheme}://${origin.serverHost}$port${origin.uri}"
 }
