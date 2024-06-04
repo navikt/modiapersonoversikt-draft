@@ -110,21 +110,6 @@ suspend fun WebSocketServerSession.draftws(uuidDAO: UuidDAO, wsHandler: WsHandle
 }
 
 
-suspend inline fun <reified T> WebSocketServerSession.deserialize(frame: Frame.Text): T {
-    val conv = checkNotNull(converter) { "No converter found" }
-    val result = conv.deserialize(
-        charset = call.request.headers.suitableCharset(),
-        typeInfo = typeInfo<T>(),
-        content = frame
-    )
-    if (result is T) return result
-
-    throw WebsocketDeserializeException(
-        "Can't deserialize value : expected value of type ${T::class.simpleName}, got ${result::class.simpleName}",
-        frame = frame
-    )
-}
-
 private fun Parameters.parse(): Pair<Boolean, DraftContext> {
     val exact = this["exact"]?.toBoolean() ?: true
     val context = this
