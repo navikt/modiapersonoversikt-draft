@@ -67,7 +67,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashVersion")
     implementation("no.nav:vault-jdbc:1.3.10")
-    implementation("org.flywaydb:flyway-core:8.5.12")
+    implementation("org.flywaydb:flyway-core:10.14.0")
     implementation("com.github.seratch:kotliquery:1.9.0")
 
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")
