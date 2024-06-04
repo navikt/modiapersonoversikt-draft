@@ -3,7 +3,7 @@ package no.nav.modiapersonoversikt.utils
 import io.ktor.websocket.*
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
-import no.nav.personoversikt.ktor.utils.Metrics
+import no.nav.personoversikt.common.ktor.utils.Metrics
 
 class SessionList {
     private val lock = Semaphore(permits = 1)
