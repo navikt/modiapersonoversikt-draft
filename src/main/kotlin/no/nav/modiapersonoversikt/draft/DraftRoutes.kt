@@ -1,7 +1,6 @@
 package no.nav.modiapersonoversikt.draft
 
 import io.ktor.http.*
-import io.ktor.serialization.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
@@ -10,14 +9,13 @@ import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.util.*
 import io.ktor.util.pipeline.*
-import io.ktor.util.reflect.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.runBlocking
 import no.nav.modiapersonoversikt.UUIDPrincipal
 import no.nav.modiapersonoversikt.log
 import no.nav.modiapersonoversikt.utils.SessionList
-import no.nav.personoversikt.ktor.utils.Security.SubjectPrincipal
+import no.nav.personoversikt.common.ktor.utils.Security.SubjectPrincipal
 import java.util.*
 
 fun Route.draftRoutes(authProviders: Array<String?>, dao: DraftDAO, uuidDAO: UuidDAO) {

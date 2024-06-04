@@ -2,9 +2,9 @@ package no.nav.modiapersonoversikt.config
 
 import io.ktor.http.*
 import no.nav.modiapersonoversikt.AzureAd
-import no.nav.personoversikt.ktor.utils.Security
-import no.nav.personoversikt.ktor.utils.Security.AuthProviderConfig
-import no.nav.personoversikt.utils.EnvUtils.getRequiredConfig
+import no.nav.personoversikt.common.ktor.utils.Security
+import no.nav.personoversikt.common.ktor.utils.Security.AuthProviderConfig
+import no.nav.personoversikt.common.utils.EnvUtils.getRequiredConfig
 
 private val defaultValues = mapOf(
     "NAIS_CLUSTER_NAME" to "local",

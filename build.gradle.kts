@@ -6,7 +6,7 @@ val ktorVersion = "2.3.11"
 val prometheusVersion = "1.13.0"
 val logbackVersion = "1.5.6"
 val logstashVersion = "7.4"
-val modiaCommonVersion = "1.2022.07.26-13.42-b5f759e4f887"
+val modiaCommonVersion = "1.2024.05.31-12.22-e61d6fb8f19f"
 
 plugins {
     kotlin("jvm") version "2.0.0"
@@ -60,9 +60,9 @@ dependencies {
     implementation("io.ktor:ktor-server-metrics-micrometer:$ktorVersion")
     implementation("io.micrometer:micrometer-registry-prometheus:$prometheusVersion")
 
-    implementation("no.nav.personoversikt:ktor-utils:$modiaCommonVersion")
-    implementation("no.nav.personoversikt:kotlin-utils:$modiaCommonVersion")
-    implementation("no.nav.personoversikt:crypto:$modiaCommonVersion")
+    implementation("com.github.navikt.modia-common-utils:ktor-utils:$modiaCommonVersion")
+    implementation("com.github.navikt.modia-common-utils:kotlin-utils:$modiaCommonVersion")
+    implementation("com.github.navikt.modia-common-utils:crypto:$modiaCommonVersion")
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashVersion")

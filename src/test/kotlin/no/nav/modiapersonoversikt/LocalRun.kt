@@ -4,7 +4,7 @@ import io.ktor.server.netty.*
 import no.nav.modiapersonoversikt.config.Configuration
 import no.nav.modiapersonoversikt.config.DataSourceConfiguration
 import no.nav.modiapersonoversikt.config.DatabaseConfig
-import no.nav.personoversikt.ktor.utils.KtorServer
+import no.nav.personoversikt.common.ktor.utils.KtorServer
 import org.testcontainers.containers.PostgreSQLContainer
 
 class SpecifiedPostgreSQLContainer : PostgreSQLContainer<SpecifiedPostgreSQLContainer>("postgres:14.3-alpine")

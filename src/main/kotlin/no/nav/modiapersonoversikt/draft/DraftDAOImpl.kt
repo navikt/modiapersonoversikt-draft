@@ -9,7 +9,7 @@ import no.nav.modiapersonoversikt.utils.execute
 import no.nav.modiapersonoversikt.utils.fromJson
 import no.nav.modiapersonoversikt.utils.toJson
 import no.nav.modiapersonoversikt.utils.transactional
-import no.nav.personoversikt.ktor.utils.Selftest
+import no.nav.personoversikt.common.utils.SelftestGenerator
 import javax.sql.DataSource
 import kotlin.concurrent.fixedRateTimer
 import kotlin.time.Duration.Companion.seconds
@@ -17,7 +17,7 @@ import kotlin.time.Duration.Companion.seconds
 private const val table = "draft"
 
 class DraftDAOImpl(private val dataSource: DataSource) : DraftDAO {
-    private val selftest = Selftest.Reporter("Database", true)
+    private val selftest = SelftestGenerator.Reporter("Database", true)
 
     init {
         fixedRateTimer("Database check", daemon = true, initialDelay = 0, period = 10.seconds.inWholeMilliseconds) {
