@@ -1,7 +1,9 @@
 package no.nav.modiapersonoversikt
 
+import io.ktor.client.plugins.defaultRequest
 import io.ktor.server.application.Application
 import io.ktor.server.testing.*
+import io.ktor.server.util.url
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import no.nav.modiapersonoversikt.config.Configuration
