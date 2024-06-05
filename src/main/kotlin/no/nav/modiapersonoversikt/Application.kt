@@ -20,9 +20,9 @@ import no.nav.modiapersonoversikt.draft.draftRoutes
 import no.nav.modiapersonoversikt.infrastructure.exceptionHandler
 import no.nav.modiapersonoversikt.infrastructure.notFoundHandler
 import no.nav.modiapersonoversikt.utils.JacksonUtils.objectMapper
-import no.nav.personoversikt.ktor.utils.Metrics
-import no.nav.personoversikt.ktor.utils.Security
-import no.nav.personoversikt.ktor.utils.Selftest
+import no.nav.personoversikt.common.ktor.utils.Metrics
+import no.nav.personoversikt.common.ktor.utils.Security
+import no.nav.personoversikt.common.ktor.utils.Selftest
 import org.slf4j.event.Level
 import java.time.Duration
 import javax.sql.DataSource

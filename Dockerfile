@@ -1,4 +1,4 @@
-FROM navikt/java:11-appdynamics
+FROM navikt/java:17-appdynamics
 
 ENV APPD_ENABLED=true
 ENV JAVA_OPTS="${JAVA_OPTS} -Xms256m -Xmx512m"

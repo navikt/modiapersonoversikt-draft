@@ -1,7 +1,6 @@
 package no.nav.modiapersonoversikt.draft
 
 import io.ktor.http.*
-import io.ktor.serialization.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
@@ -10,14 +9,13 @@ import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.util.*
 import io.ktor.util.pipeline.*
-import io.ktor.util.reflect.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.runBlocking
 import no.nav.modiapersonoversikt.UUIDPrincipal
 import no.nav.modiapersonoversikt.log
 import no.nav.modiapersonoversikt.utils.SessionList
-import no.nav.personoversikt.ktor.utils.Security.SubjectPrincipal
+import no.nav.personoversikt.common.ktor.utils.Security.SubjectPrincipal
 import java.util.*
 
 fun Route.draftRoutes(authProviders: Array<String?>, dao: DraftDAO, uuidDAO: UuidDAO) {
@@ -62,7 +60,7 @@ fun Route.draftRoutes(authProviders: Array<String?>, dao: DraftDAO, uuidDAO: Uui
     authenticate(*authProviders) {
         get("/generate-uid") {
             withSubject { subject ->
-                call.respond(uuidDAO.generateUid(subject).uuid.toString())
+                call.respond(uuidDAO.generateUid(subject).uuid)
             }
         }
     }
@@ -109,21 +107,6 @@ suspend fun WebSocketServerSession.draftws(uuidDAO: UuidDAO, wsHandler: WsHandle
     }
 }
 
-
-suspend inline fun <reified T> WebSocketServerSession.deserialize(frame: Frame.Text): T {
-    val conv = checkNotNull(converter) { "No converter found" }
-    val result = conv.deserialize(
-        charset = call.request.headers.suitableCharset(),
-        typeInfo = typeInfo<T>(),
-        content = frame
-    )
-    if (result is T) return result
-
-    throw WebsocketDeserializeException(
-        "Can't deserialize value : expected value of type ${T::class.simpleName}, got ${result::class.simpleName}",
-        frame = frame
-    )
-}
 
 private fun Parameters.parse(): Pair<Boolean, DraftContext> {
     val exact = this["exact"]?.toBoolean() ?: true
