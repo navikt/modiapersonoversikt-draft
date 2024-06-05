@@ -11,6 +11,7 @@ val flywayVersion = "10.14.0"
 
 plugins {
     kotlin("jvm") version "2.0.0"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
     idea
 }
 
@@ -93,20 +94,23 @@ tasks.test {
     }
 }
 
-task<Jar>("fatJar") {
-    archiveBaseName.set("app")
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    manifest {
-        attributes["Implementation-Title"] = "modiapersonoversikt-draft"
-        attributes["Implementation-Version"] = archiveVersion
-        attributes["Main-Class"] = mainClass
-    }
-    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
-    with(tasks.jar.get() as CopySpec)
-}
-
 tasks {
+    shadowJar {
+        mergeServiceFiles {
+            setPath("META-INF/services/org.flywaydb.core.extensibility.Plugin")
+        }
+        archiveBaseName.set("app")
+        archiveClassifier.set("")
+        isZip64 = true
+        manifest {
+            attributes(
+                mapOf(
+                    "Main-Class" to mainClass,
+                ),
+            )
+        }
+    }
     "build" {
-        dependsOn("fatJar")
+        dependsOn("shadowJar")
     }
 }
