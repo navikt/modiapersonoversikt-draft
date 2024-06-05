@@ -55,12 +55,12 @@ fun Application.draftApp(
     }
 
     install(Metrics.Plugin) {
-        contextpath = appContextpath
+        contextpath = configuration.appContextpath
     }
 
     install(Selftest.Plugin) {
         appname = appName
-        contextpath = appContextpath
+        contextpath = configuration.appContextpath
         version = appImage
     }
 
@@ -90,7 +90,7 @@ fun Application.draftApp(
         level = Level.INFO
         disableDefaultColors()
         filter { call ->
-            val apiCall = call.request.path().startsWith("/modiapersonoversikt-draft/api")
+            val apiCall = call.request.path().startsWith("/${configuration.appContextpath}/api".replace("//", "/"))
             val wsAuthChallenge = call.request.path().endsWith("/ws") && call.response.status() == HttpStatusCode.Unauthorized
             apiCall && !wsAuthChallenge
         }
@@ -109,7 +109,7 @@ fun Application.draftApp(
     }
 
     routing {
-        route(appContextpath) {
+        route(configuration.appContextpath) {
             route("api") {
                 draftRoutes(security.authproviders, draftDAO, uuidDAO)
             }

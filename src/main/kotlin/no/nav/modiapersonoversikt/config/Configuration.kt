@@ -22,6 +22,7 @@ data class DatabaseConfig(
 
 class Configuration(
     val clusterName: String = getRequiredConfig("NAIS_CLUSTER_NAME", defaultValues),
+    val appContextpath: String = if (listOf("prod-gcp", "dev-gcp").contains(clusterName)) "" else "modiapersonoversikt-draft" ,
     val azuread: AuthProviderConfig =
         AuthProviderConfig(
             name = AzureAd,
