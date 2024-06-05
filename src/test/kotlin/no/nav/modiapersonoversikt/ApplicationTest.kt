@@ -10,6 +10,7 @@ import no.nav.modiapersonoversikt.draft.SaveDraftDTO
 import no.nav.modiapersonoversikt.utils.fromJson
 import no.nav.modiapersonoversikt.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
 class ApplicationTest : WithDatabase {
@@ -19,6 +20,15 @@ class ApplicationTest : WithDatabase {
             val response = getDrafts()
             assertEquals(response.status, 200)
             assertEquals(response.data, emptyList<DraftDTO>())
+        }
+    }
+
+    @Test
+    fun `should generate uid for draft`() {
+        withTestApp(connectionUrl()) {
+            val res = generateUid()
+            assertEquals(res.status, 200)
+            assertNotNull(res.data)
         }
     }
 
@@ -75,6 +85,15 @@ class JsonResponse<T>(
     val status: Int,
     val data: T,
 )
+
+suspend fun ApplicationTestBuilder.generateUid(): JsonResponse<String>  {
+    val response = client.get("/modiapersonoversikt-draft/api/generate-uid") {
+         accept(ContentType.Application.Json)
+    }
+
+    val data =  response.bodyAsText().fromJson<String>()
+    return JsonResponse(response.status.value, data)
+}
 
 suspend fun ApplicationTestBuilder.saveDraft(draft: SaveDraftDTO): JsonResponse<DraftDTO> {
     val response = client.post("/modiapersonoversikt-draft/api/draft") {
