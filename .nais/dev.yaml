@@ -9,21 +9,21 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
 spec:
-  image: {{image}}
+  image: "{{image}}"
   port: 7070
   liveness:
-    path: /modiapersonoversikt-draft/internal/isAlive
+    path: /internal/isAlive
     initialDelay: 20
     timeout: 1
     periodSeconds: 5
     failureThreshold: 10
   readiness:
-    path: /modiapersonoversikt-draft/internal/isReady
+    path: /internal/isReady
     initialDelay: 20
     timeout: 1
   prometheus:
     enabled: true
-    path: /modiapersonoversikt-draft/internal/metrics
+    path: /internal/metrics
   resources:
     requests:
       cpu: 150m
