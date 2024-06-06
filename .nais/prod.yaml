@@ -9,21 +9,21 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
 spec:
-  image: {{image}}
+  image: "{{image}}"
   port: 7070
   liveness:
-    path: /modiapersonoversikt-draft/internal/isAlive
+    path: /internal/isAlive
     initialDelay: 20
     timeout: 1
     periodSeconds: 5
     failureThreshold: 10
   readiness:
-    path: /modiapersonoversikt-draft/internal/isReady
+    path: /internal/isReady
     initialDelay: 20
     timeout: 1
   prometheus:
     enabled: true
-    path: /modiapersonoversikt-draft/internal/metrics
+    path: /internal/metrics
   resources:
     requests:
       cpu: 250m
@@ -32,11 +32,16 @@ spec:
       cpu: 2000m
       memory: 1024Mi
   ingresses:
-    - https://app.adeo.no/modiapersonoversikt-draft
+    - https://modiapersonoversikt-draft.intern.nav.no
   replicas:
     min: 2
     max: 4
     cpuThresholdPercentage: 85
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_15
+        databases:
+          - name: modiapersonoversikt-draft-db
   azure:
     application:
       enabled: true
@@ -51,16 +56,9 @@ spec:
         - application: modiapersonoversikt
           namespace: personoversikt
           cluster: prod-fss
-  vault:
-    enabled: true
-    paths:
-      - kvPath: /apikey/appdynamics/prod
-        mountPath: /var/run/secrets/nais.io/vault
-  webproxy: true
+        - application: modiapersonoversikt
+          namespace: personoversikt
+          cluster: prod-gcp
   env:
-    - name: DATABASE_JDBC_URL
-      value: "jdbc:postgresql://A01DBVL033.adeo.no:5432/modiapersonoversikt-draft-pg15"
     - name: DATABASE_NAME
-      value: "modiapersonoversikt-draft-pg15"
-    - name: VAULT_MOUNTPATH
-      value: "postgresql/prod-fss"
+      value: "modiapersonoversikt-draft-db"
