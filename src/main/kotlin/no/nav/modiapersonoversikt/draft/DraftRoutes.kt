@@ -97,7 +97,7 @@ suspend fun WebSocketServerSession.draftws(uuidDAO: UuidDAO, wsHandler: WsHandle
     } else {
         try {
             while (true) {
-                wsHandler.process(ownerUuid.owner, receiveDeserialized())
+                wsHandler.process(this, ownerUuid.owner, receiveDeserialized())
             }
         } catch (e: ClosedReceiveChannelException) {
             // This is expected when client disconnectes
