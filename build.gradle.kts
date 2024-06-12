@@ -3,11 +3,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 val mainClass = "no.nav.modiapersonoversikt.MainKt"
 val kotlinVersion = "2.0.0"
 val ktorVersion = "2.3.11"
-val prometheusVersion = "1.13.0"
+val prometheusVersion = "1.13.1"
 val logbackVersion = "1.5.6"
 val logstashVersion = "7.4"
-val modiaCommonVersion = "1.2024.05.31-12.22-e61d6fb8f19f"
-val flywayVersion = "10.14.0"
+val modiaCommonVersion = "1.2024.06.07-08.12-d0197775eca3"
+val flywayVersion = "10.15.0"
 
 plugins {
     kotlin("jvm") version "2.0.0"

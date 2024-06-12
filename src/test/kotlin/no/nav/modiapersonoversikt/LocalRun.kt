@@ -14,7 +14,8 @@ fun runLocally(useMock: Boolean) {
     db.start()
 
     val configuration = Configuration(
-        database = DatabaseConfig(jdbcUrl = db.jdbcUrl)
+        database = DatabaseConfig(jdbcUrl = db.jdbcUrl),
+        appContextpath = ""
     )
     val dbConfig = DataSourceConfiguration(configuration)
 
