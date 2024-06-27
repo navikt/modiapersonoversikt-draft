@@ -1,7 +1,8 @@
-FROM navikt/java:17-appdynamics
-
-ENV APPD_ENABLED=true
+FROM gcr.io/distroless/java17-debian12
 ENV JAVA_OPTS="${JAVA_OPTS} -Xms256m -Xmx512m"
-COPY java-debug.sh /init-scripts/08-java-debug.sh
+
+USER nonroot
 
 COPY build/libs/app.jar app.jar
+
+CMD ["app.jar"]
