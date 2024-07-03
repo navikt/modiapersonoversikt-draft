@@ -56,12 +56,6 @@ spec:
         - application: modiapersonoversikt
           namespace: personoversikt
           cluster: dev-gcp
-        - application: modiapersonoversikt-q0
-          namespace: personoversikt
-          cluster: dev-fss
-        - application: modiapersonoversikt-q1
-          namespace: personoversikt
-          cluster: dev-fss
   webproxy: true
   env:
     - name: DATABASE_NAME

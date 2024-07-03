@@ -3,13 +3,12 @@ package no.nav.modiapersonoversikt.config
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import no.nav.modiapersonoversikt.log
-import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil
 import org.flywaydb.core.Flyway
 import javax.sql.DataSource
 
 class DataSourceConfiguration(private val env: Configuration) {
-    private var userDataSource = createDatasource("user")
-    private var adminDataSource = createDatasource("admin")
+    private var userDataSource = createDatasource()
+    private var adminDataSource = createDatasource()
 
     fun userDataSource() = userDataSource
     fun adminDataSource() = adminDataSource
@@ -19,7 +18,7 @@ class DataSourceConfiguration(private val env: Configuration) {
             .configure()
             .dataSource(adminDataSource)
             .also {
-                if (adminDataSource is HikariDataSource && (env.clusterName == "dev-fss" || env.clusterName == "prod-fss")) {
+                if (adminDataSource is HikariDataSource) {
                     val dbUser = dbRole(env.database.dbName, "admin")
                     it.initSql("SET ROLE '$dbUser'")
                 }
@@ -28,8 +27,7 @@ class DataSourceConfiguration(private val env: Configuration) {
             .migrate()
     }
 
-    private fun createDatasource(user: String): DataSource {
-        val mountPath = env.database.vaultMountpath
+    private fun createDatasource(): DataSource {
         val config = HikariConfig()
         config.jdbcUrl = env.database.jdbcUrl
         config.minimumIdle = 0
@@ -46,15 +44,7 @@ class DataSourceConfiguration(private val env: Configuration) {
             return HikariDataSource(config)
         }
 
-        if (env.clusterName == "dev-gcp" || env.clusterName == "prod-gcp") {
-            return HikariDataSource(config)
-        }
-
-        return HikariCPVaultUtil.createHikariDataSourceWithVaultIntegration(
-            config,
-            mountPath,
-            dbRole(env.database.dbName, user),
-        )
+        return HikariDataSource(config)
     }
 
     private fun dbRole(dbName: String, user: String): String = "$dbName-$user"
