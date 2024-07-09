@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 val mainClass = "no.nav.modiapersonoversikt.MainKt"
 val kotlinVersion = "2.0.0"
 val ktorVersion = "2.3.12"
-val prometheusVersion = "1.13.1"
+val prometheusVersion = "1.13.2"
 val logbackVersion = "1.5.6"
 val logstashVersion = "7.4"
 val modiaCommonVersion = "1.2024.06.26-10.11-d6295491fb9f"
