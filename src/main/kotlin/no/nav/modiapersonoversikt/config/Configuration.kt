@@ -17,7 +17,6 @@ private val defaultValues = mapOf(
 data class DatabaseConfig(
     val dbName: String = getRequiredConfig("DATABASE_NAME", defaultValues),
     val jdbcUrl: String,
-    val vaultMountpath: String? = null,
 )
 
 class Configuration(
@@ -36,18 +35,10 @@ class Configuration(
                 Security.TokenLocation.Header(HttpHeaders.Authorization)
             )
         ),
-    val database: DatabaseConfig = if (clusterName == "dev-gcp" || clusterName == "prod-gcp") {
-        DatabaseConfig(
+    val database: DatabaseConfig = DatabaseConfig(
             jdbcUrl = getRequiredConfig(
                 "NAIS_DATABASE_MODIAPERSONOVERSIKT_DRAFT_MODIAPERSONOVERSIKT_DRAFT_DB_JDBC_URL",
                 defaultValues
             ),
         )
-
-    } else {
-        DatabaseConfig(
-            jdbcUrl = getRequiredConfig("DATABASE_JDBC_URL", defaultValues),
-            vaultMountpath = getRequiredConfig("VAULT_MOUNTPATH", defaultValues),
-        )
-    }
 )
