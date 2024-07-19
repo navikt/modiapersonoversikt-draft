@@ -3,11 +3,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 val mainClass = "no.nav.modiapersonoversikt.MainKt"
 val kotlinVersion = "2.0.0"
 val ktorVersion = "2.3.12"
-val prometheusVersion = "1.13.1"
+val prometheusVersion = "1.13.2"
 val logbackVersion = "1.5.6"
 val logstashVersion = "7.4"
 val modiaCommonVersion = "1.2024.06.26-10.11-d6295491fb9f"
-val flywayVersion = "10.15.0"
+val flywayVersion = "10.16.0"
 
 plugins {
     kotlin("jvm") version "2.0.0"
@@ -57,7 +57,7 @@ dependencies {
 
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.1")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2")
 
     implementation("io.ktor:ktor-server-metrics-micrometer:$ktorVersion")
     implementation("io.micrometer:micrometer-registry-prometheus:$prometheusVersion")
@@ -75,7 +75,7 @@ dependencies {
 
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")
     testRuntimeOnly("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-    testImplementation("org.testcontainers:postgresql:1.19.8")
+    testImplementation("org.testcontainers:postgresql:1.20.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.3")
 }
 
