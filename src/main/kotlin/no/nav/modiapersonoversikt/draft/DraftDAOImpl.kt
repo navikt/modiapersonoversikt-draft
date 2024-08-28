@@ -44,7 +44,7 @@ class DraftDAOImpl(private val dataSource: DataSource) : DraftDAO {
     override suspend fun deleteOldDrafts() {
         return transactional(dataSource) { tx ->
             log.info("Deleting old drafts")
-            val deletedLines = tx.run(queryOf("DELETE FROM $table WHERE created < now() - INTERVAL '4 HOUR'").asUpdate)
+            val deletedLines = tx.run(queryOf("DELETE FROM $table WHERE created < now() - INTERVAL '7 DAYS'").asUpdate)
             log.info("Deleted old drafts: $deletedLines")
         }
     }
