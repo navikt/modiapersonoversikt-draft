@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val mainClass = "no.nav.modiapersonoversikt.MainKt"
-val kotlinVersion = "2.0.10"
+val kotlinVersion = "2.0.20"
 val ktorVersion = "2.3.12"
 val prometheusVersion = "1.13.3"
 val logbackVersion = "1.5.7"
