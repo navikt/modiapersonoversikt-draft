@@ -8,7 +8,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.util.*
-import io.ktor.util.pipeline.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.runBlocking
@@ -21,7 +20,7 @@ import java.util.*
 fun Route.draftRoutes(authProviders: Array<String?>, dao: DraftDAO, uuidDAO: UuidDAO) {
     val wsHandler = WsHandler(dao)
     val sessions = SessionList()
-    environment?.monitor?.subscribe(ApplicationStopPreparing) {
+    application.monitor.subscribe(ApplicationStopPreparing) {
         runBlocking {
             sessions.closeAll(reason = CloseReason(CloseReason.Codes.GOING_AWAY, "GOING_AWAY"))
         }
@@ -118,7 +117,7 @@ private fun Parameters.parse(): Pair<Boolean, DraftContext> {
     return Pair(exact, context)
 }
 
-private suspend fun PipelineContext<Unit, ApplicationCall>.withSubject(body: suspend (subject: String) -> Unit) {
+private suspend fun RoutingContext.withSubject(body: suspend (subject: String) -> Unit) {
     this.call.principal<SubjectPrincipal>()
         ?.subject
         ?.let { body(it) }

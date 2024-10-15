@@ -4,7 +4,7 @@ import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.plugins.callloging.*
+import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.forwardedheaders.*
@@ -12,6 +12,8 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import kotlinx.coroutines.runBlocking
 import no.nav.modiapersonoversikt.config.Configuration
 import no.nav.modiapersonoversikt.draft.DraftDAOImpl
@@ -24,10 +26,11 @@ import no.nav.personoversikt.common.ktor.utils.Metrics
 import no.nav.personoversikt.common.ktor.utils.Security
 import no.nav.personoversikt.common.ktor.utils.Selftest
 import org.slf4j.event.Level
-import java.time.Duration
 import javax.sql.DataSource
 import kotlin.concurrent.fixedRateTimer
 import kotlin.time.Duration.Companion.minutes
+
+val prometheusRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 
 fun Application.draftApp(
     configuration: Configuration,
@@ -56,6 +59,7 @@ fun Application.draftApp(
 
     install(Metrics.Plugin) {
         contextpath = configuration.appContextpath
+        registry = prometheusRegistry
     }
 
     install(Selftest.Plugin) {
@@ -82,7 +86,7 @@ fun Application.draftApp(
     }
 
     install(WebSockets) {
-        pingPeriod = Duration.ofMinutes(3)
+        pingPeriod = 3.minutes
         contentConverter = JacksonWebsocketContentConverter(objectMapper)
     }
 
@@ -117,4 +121,4 @@ fun Application.draftApp(
     }
 }
 
-data class UUIDPrincipal(val uuid: String) : Principal
+data class UUIDPrincipal(val uuid: String)

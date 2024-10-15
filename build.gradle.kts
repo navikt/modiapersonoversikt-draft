@@ -1,17 +1,20 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val mainClass = "no.nav.modiapersonoversikt.MainKt"
 val kotlinVersion = "2.0.21"
-val ktorVersion = "2.3.12"
+val ktorVersion = "3.0.0"
 val prometheusVersion = "1.13.6"
-val logbackVersion = "1.5.10"
+val logbackVersion = "1.5.9"
 val logstashVersion = "8.0"
-val modiaCommonVersion = "1.2024.10.11-15.15-d6429c0f5c33"
+val modiaCommonVersion = "1.2024.10.15-08.58-ff5db0c77a01"
 val flywayVersion = "10.19.0"
+val hikariVersion = "5.1.0"
+val postgresqlVersion = "42.7.4"
 
 plugins {
     kotlin("jvm") version "2.0.21"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.gradleup.shadow") version "8.3.3"
     idea
 }
 
@@ -68,11 +71,14 @@ dependencies {
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashVersion")
-    implementation("no.nav:vault-jdbc:1.3.10")
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
     implementation("com.github.seratch:kotliquery:1.9.0")
 
+    implementation("com.zaxxer:HikariCP:$hikariVersion")
+    implementation("org.postgresql:postgresql:$postgresqlVersion")
+
+    testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")
     testRuntimeOnly("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     testImplementation("org.testcontainers:postgresql:1.20.2")
@@ -84,7 +90,9 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "21"
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
+    }
 }
 
 tasks.test {
