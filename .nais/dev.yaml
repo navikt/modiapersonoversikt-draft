@@ -30,11 +30,10 @@ spec:
       runtime: java
   resources:
     requests:
-      cpu: 150m
-      memory: 512Mi
+      cpu: 10m
+      memory: 300Mi
     limits:
-      cpu: 2000m
-      memory: 1024Mi
+      memory: 512Mi
   ingresses:
     - https://modiapersonoversikt-draft.intern.dev.nav.no
   replicas:
