@@ -9,7 +9,7 @@ val logbackVersion = "1.5.18"
 val logstashVersion = "8.1"
 val modiaCommonVersion = "1.2025.08.20-10.02-d99e24c2fbbe"
 val flywayVersion = "11.11.2"
-val hikariVersion = "7.0.1"
+val hikariVersion = "7.0.2"
 val postgresqlVersion = "42.7.7"
 
 plugins {
