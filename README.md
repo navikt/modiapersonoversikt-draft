@@ -1,6 +1,9 @@
 # Kladding for modiapersonoversikt
 En tjeneste for å ta vare på kladd for modiapersonoversikt.
 
+## Flyt
+
+Se https://confluence.adeo.no/spaces/TFO/pages/385074211/Arkitektur
 
 ## Kjøre lokal
 `LocalRun.kt` inneholder main-metode for kjøring lokalt
