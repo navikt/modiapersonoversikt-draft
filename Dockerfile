@@ -3,6 +3,6 @@ ENV JAVA_OPTS="${JAVA_OPTS} -Xms256m -Xmx512m"
 
 USER nonroot
 
-COPY build/libs/app.jar app.jar
+COPY build/install/*/lib /lib
 
-CMD ["app.jar"]
+ENTRYPOINT ["java", "-cp", "/lib/*", "no.nav.modiapersonoversikt.MainKt"]
