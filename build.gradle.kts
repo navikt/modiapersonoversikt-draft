@@ -35,7 +35,6 @@ repositories {
             credentials {
                 username = "token"
                 password = githubToken
-                password = githubToken
             }
         }
     }
