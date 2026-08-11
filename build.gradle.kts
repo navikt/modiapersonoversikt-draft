@@ -14,7 +14,7 @@ val postgresqlVersion = "42.7.9"
 
 plugins {
     kotlin("jvm") version "2.3.0"
-    id("com.gradleup.shadow") version "8.3.9"
+    application
     idea
 }
 
@@ -99,26 +99,5 @@ tasks.test {
     useJUnitPlatform()
     testLogging {
         events("passed", "skipped", "failed")
-    }
-}
-
-tasks {
-    shadowJar {
-        mergeServiceFiles {
-            setPath("META-INF/services/org.flywaydb.core.extensibility.Plugin")
-        }
-        archiveBaseName.set("app")
-        archiveClassifier.set("")
-        isZip64 = true
-        manifest {
-            attributes(
-                mapOf(
-                    "Main-Class" to mainClass,
-                ),
-            )
-        }
-    }
-    "build" {
-        dependsOn("shadowJar")
     }
 }

@@ -40,7 +40,7 @@ jobs:
           java-version: 21
           cache: 'gradle'
       - name: Build
-        run: ./gradlew build
+        run: ./gradlew installDist
       - name: Publish Docker image
         uses: nais/docker-build-push@v0
         id: docker-build-push
