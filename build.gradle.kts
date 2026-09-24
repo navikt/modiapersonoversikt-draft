@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val mainClass = "no.nav.modiapersonoversikt.MainKt"
-val kotlinVersion = "2.4.10"
+val kotlinVersion = "2.4.20"
 val ktorVersion = "3.6.0"
 val prometheusVersion = "1.17.1"
 val logbackVersion = "1.6.3"
