@@ -13,7 +13,7 @@ val hikariVersion = "7.1.0"
 val postgresqlVersion = "42.7.14"
 
 plugins {
-    kotlin("jvm") version "2.4.20"
+    kotlin("jvm") version "2.4.21"
     application
     idea
 }
