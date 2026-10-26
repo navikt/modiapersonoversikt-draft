@@ -1,4 +1,4 @@
-FROM gcr.io/distroless/java21-debian12
+FROM gcr.io/distroless/java21-debian13
 ENV JAVA_OPTS="${JAVA_OPTS} -Xms256m -Xmx512m"
 
 USER nonroot
