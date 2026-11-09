@@ -1,7 +1,5 @@
-FROM gcr.io/distroless/java21-debian13
-ENV JAVA_OPTS="${JAVA_OPTS} -Xms256m -Xmx512m"
-
-USER nonroot
+FROM europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/jre:openjdk-21
+ENV JAVA_OPTS="-Xms256m -Xmx512m"
 
 COPY build/install/*/lib /lib
 
