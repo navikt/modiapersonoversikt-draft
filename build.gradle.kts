@@ -64,7 +64,8 @@ dependencies {
 
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.4")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.23.0")
+    implementation(platform("tools.jackson:jackson-bom:3.3.0"))
 
     implementation("io.ktor:ktor-server-metrics-micrometer:$ktorVersion")
     implementation("io.micrometer:micrometer-registry-prometheus:$prometheusVersion")
@@ -87,6 +88,10 @@ dependencies {
     testRuntimeOnly("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     testImplementation("org.testcontainers:postgresql:1.21.4")
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
+
+    constraints {
+        implementation("com.google.guava:guava:33.8.0-jre")
+    }
 }
 
 java {
