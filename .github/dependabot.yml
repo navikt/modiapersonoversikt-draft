@@ -1,14 +1,46 @@
 version: 2
+registries:
+  navikt-maven-release:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/maven-release
+    username: x-access-token
+    password: ${{ secrets.READER_TOKEN }}
 updates:
   - package-ecosystem: gradle
     directory: /
+    registries:
+      - navikt-maven-release
     schedule:
-      interval: daily
-  - package-ecosystem:  github-actions
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Oslo
+    open-pull-requests-limit: 1
+    groups:
+      all:
+        patterns:
+          - "*"
+  - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: daily
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Oslo
+    open-pull-requests-limit: 1
+    groups:
+      all:
+        patterns:
+          - "*"
   - package-ecosystem: docker
     directory: /
     schedule:
-      interval: daily
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Oslo
+    open-pull-requests-limit: 1
+    groups:
+      all:
+        patterns:
+          - "*"

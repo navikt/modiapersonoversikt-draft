@@ -2,20 +2,24 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val mainClass = "no.nav.modiapersonoversikt.MainKt"
-val kotlinVersion = "2.4.20"
+val kotlinVersion = "2.4.21"
 val ktorVersion = "3.6.0"
-val prometheusVersion = "1.17.1"
+val prometheusVersion = "1.17.2"
 val logbackVersion = "1.6.5"
 val logstashVersion = "9.0"
 val modiaCommonVersion = "1.2026.08.06-12.11-d922f6248916"
-val flywayVersion = "13.9.0"
+val flywayVersion = "13.11.1"
 val hikariVersion = "7.1.0"
 val postgresqlVersion = "42.7.14"
 
 plugins {
-    kotlin("jvm") version "2.4.20"
+    kotlin("jvm") version "2.4.21"
     application
     idea
+}
+
+dependencyLocking {
+    lockAllConfigurations()
 }
 
 repositories {
@@ -60,7 +64,7 @@ dependencies {
 
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.3")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.4")
 
     implementation("io.ktor:ktor-server-metrics-micrometer:$ktorVersion")
     implementation("io.micrometer:micrometer-registry-prometheus:$prometheusVersion")
